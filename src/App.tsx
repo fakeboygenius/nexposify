@@ -9,6 +9,7 @@ import { RestaurantProvider } from "@/context/RestaurantContext";
 import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/Dashboard";
 import OrderLine from "@/pages/OrderLine";
+import ManageDishes from "@/pages/ManageDishes";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/order-line" element={<OrderLine />} />
+              <Route path="/manage-dishes" element={<ManageDishes />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

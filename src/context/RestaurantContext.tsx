@@ -26,6 +26,10 @@ interface RestaurantContextType {
   selectCategory: (category: Category | null) => void;
   addOrderItem: (menuItem: MenuItem, quantity: number) => void;
   removeOrderItem: (orderItemId: string) => void;
+  addMenuItem: (menuItem: MenuItem) => void;
+  updateMenuItem: (menuItem: MenuItem) => void;
+  deleteMenuItem: (menuItemId: string) => void;
+  addCategory: (category: Category) => void;
 }
 
 const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
@@ -36,6 +40,8 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [menuItemsList, setMenuItemsList] = useState<MenuItem[]>(menuItems);
+  const [categoriesList, setCategoriesList] = useState<Category[]>(menuCategories);
   const [orderItems, setOrderItems] = useState<any[]>([]);
 
   const updateOrderStatus = (orderId: string, status: OrderStatus) => {
@@ -72,14 +78,36 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     toast.success(`Item removed from order`);
   };
 
+  const addMenuItem = (menuItem: MenuItem) => {
+    setMenuItemsList(prev => [...prev, menuItem]);
+    toast.success(`Added new dish: ${menuItem.name}`);
+  };
+
+  const updateMenuItem = (menuItem: MenuItem) => {
+    setMenuItemsList(prev => 
+      prev.map(item => item.id === menuItem.id ? menuItem : item)
+    );
+    toast.success(`Updated dish: ${menuItem.name}`);
+  };
+
+  const deleteMenuItem = (menuItemId: string) => {
+    setMenuItemsList(prev => prev.filter(item => item.id !== menuItemId));
+    toast.success(`Dish deleted successfully`);
+  };
+
+  const addCategory = (category: Category) => {
+    setCategoriesList(prev => [...prev, category]);
+    toast.success(`Added new category: ${category.name}`);
+  };
+
   return (
     <RestaurantContext.Provider
       value={{
         user: currentUser,
         orders,
         tables,
-        menuItems,
-        categories: menuCategories,
+        menuItems: menuItemsList,
+        categories: categoriesList,
         reservations,
         customers,
         activeOrderDetails,
@@ -94,6 +122,10 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         selectCategory,
         addOrderItem,
         removeOrderItem,
+        addMenuItem,
+        updateMenuItem,
+        deleteMenuItem,
+        addCategory,
       }}
     >
       {children}
