@@ -1,11 +1,9 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { activeOrders, tables, menuItems, menuCategories, currentUser, reservations, customers, activeOrderDetails } from '@/data/mockData';
 import { Order, Table, MenuItem, Category, UserProfile, Reservation, Customer, OrderStatus } from '@/lib/types';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 interface RestaurantContextType {
-  // Data
   user: UserProfile;
   orders: Order[];
   tables: Table[];
@@ -15,13 +13,11 @@ interface RestaurantContextType {
   customers: Customer[];
   activeOrderDetails: any;
   
-  // State
   currentView: string;
   selectedOrder: Order | null;
   selectedTable: Table | null;
   selectedCategory: Category | null;
   
-  // Actions
   setCurrentView: (view: string) => void;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
   selectOrder: (order: Order | null) => void;
