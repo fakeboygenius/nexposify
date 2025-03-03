@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState } from 'react';
 import { activeOrders, tables, menuItems, menuCategories, currentUser, reservations, customers, activeOrderDetails } from '@/data/mockData';
 import { Order, Table, MenuItem, Category, UserProfile, Reservation, Customer, OrderStatus } from '@/lib/types';
@@ -53,7 +52,7 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       )
     );
     
-    toast.success(`Order status updated to ${status}`);
+    toast(`Order status updated to ${status}`);
   };
 
   const selectOrder = (order: Order | null) => {
@@ -69,35 +68,33 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const addOrderItem = (menuItem: MenuItem, quantity: number) => {
-    // Implementation would depend on how you want to handle adding items to an order
-    toast.success(`Added ${quantity}x ${menuItem.name} to order`);
+    toast(`Added ${quantity}x ${menuItem.name} to order`);
   };
 
   const removeOrderItem = (orderItemId: string) => {
-    // Implementation would depend on how you want to handle removing items from an order
-    toast.success(`Item removed from order`);
+    toast(`Item removed from order`);
   };
 
   const addMenuItem = (menuItem: MenuItem) => {
     setMenuItemsList(prev => [...prev, menuItem]);
-    toast.success(`Added new dish: ${menuItem.name}`);
+    toast(`Added new dish: ${menuItem.name}`);
   };
 
   const updateMenuItem = (menuItem: MenuItem) => {
     setMenuItemsList(prev => 
       prev.map(item => item.id === menuItem.id ? menuItem : item)
     );
-    toast.success(`Updated dish: ${menuItem.name}`);
+    toast(`Updated dish: ${menuItem.name}`);
   };
 
   const deleteMenuItem = (menuItemId: string) => {
     setMenuItemsList(prev => prev.filter(item => item.id !== menuItemId));
-    toast.success(`Dish deleted successfully`);
+    toast(`Dish deleted successfully`);
   };
 
   const addCategory = (category: Category) => {
     setCategoriesList(prev => [...prev, category]);
-    toast.success(`Added new category: ${category.name}`);
+    toast(`Added new category: ${category.name}`);
   };
 
   return (

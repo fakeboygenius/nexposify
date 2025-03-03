@@ -34,18 +34,18 @@ const ManageDishes = () => {
   };
 
   const handleAddNewDish = () => {
-    toast.success("Opening new dish form");
+    toast("Opening new dish form");
     // This would typically open a modal or redirect to a form
   };
 
   const handleAddNewCategory = () => {
-    toast.success("Opening new category form");
+    toast("Opening new category form");
     // This would typically open a modal for category creation
   };
 
   const handleSelectAll = (checked: boolean) => {
     // Implementation for selecting all visible dishes
-    toast.success(checked ? "Selected all dishes" : "Deselected all dishes");
+    toast(checked ? "Selected all dishes" : "Deselected all dishes");
   };
 
   return (
@@ -168,7 +168,7 @@ const ManageDishes = () => {
                       <>
                         <div className="relative pb-[100%]">
                           <img
-                            src={item.image === '/dish1.jpg' ? 'public/lovable-uploads/f4421a1b-9e6f-4156-8512-068a6cdaea3d.png' : item.image}
+                            src={item.image}
                             alt={item.name}
                             className="absolute inset-0 w-full h-full object-cover rounded-md"
                           />
@@ -183,7 +183,7 @@ const ManageDishes = () => {
                       <>
                         <div className="w-16 h-16 flex-none">
                           <img
-                            src={item.image === '/dish1.jpg' ? 'public/lovable-uploads/f4421a1b-9e6f-4156-8512-068a6cdaea3d.png' : item.image}
+                            src={item.image}
                             alt={item.name}
                             className="w-full h-full object-cover rounded-md"
                           />
