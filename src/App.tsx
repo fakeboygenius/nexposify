@@ -8,6 +8,7 @@ import { RestaurantProvider } from "@/context/RestaurantContext";
 
 import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/Dashboard";
+import OrderLine from "@/pages/OrderLine";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/order-line" element={<OrderLine />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

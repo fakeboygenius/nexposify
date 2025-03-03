@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState } from 'react';
 import { activeOrders, tables, menuItems, menuCategories, currentUser, reservations, customers, activeOrderDetails } from '@/data/mockData';
 import { Order, Table, MenuItem, Category, UserProfile, Reservation, Customer, OrderStatus } from '@/lib/types';
@@ -23,6 +24,8 @@ interface RestaurantContextType {
   selectOrder: (order: Order | null) => void;
   selectTable: (table: Table | null) => void;
   selectCategory: (category: Category | null) => void;
+  addOrderItem: (menuItem: MenuItem, quantity: number) => void;
+  removeOrderItem: (orderItemId: string) => void;
 }
 
 const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
@@ -33,6 +36,7 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [orderItems, setOrderItems] = useState<any[]>([]);
 
   const updateOrderStatus = (orderId: string, status: OrderStatus) => {
     setOrders(prevOrders => 
@@ -58,6 +62,16 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setSelectedCategory(category);
   };
 
+  const addOrderItem = (menuItem: MenuItem, quantity: number) => {
+    // Implementation would depend on how you want to handle adding items to an order
+    toast.success(`Added ${quantity}x ${menuItem.name} to order`);
+  };
+
+  const removeOrderItem = (orderItemId: string) => {
+    // Implementation would depend on how you want to handle removing items from an order
+    toast.success(`Item removed from order`);
+  };
+
   return (
     <RestaurantContext.Provider
       value={{
@@ -78,6 +92,8 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         selectOrder,
         selectTable,
         selectCategory,
+        addOrderItem,
+        removeOrderItem,
       }}
     >
       {children}
