@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useRestaurant } from '@/context/RestaurantContext';
-import { Search, Plus, Grid2X2, List, Filter } from 'lucide-react';
+import { Search, Plus, Grid2X2, List, Filter, Utensils } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
@@ -46,6 +46,11 @@ const ManageDishes = () => {
   const handleSelectAll = (checked: boolean) => {
     // Implementation for selecting all visible dishes
     toast(checked ? "Selected all dishes" : "Deselected all dishes");
+  };
+
+  // Check if an image URL is valid
+  const isValidImageUrl = (url: string) => {
+    return url && url.startsWith('http');
   };
 
   return (
@@ -166,27 +171,39 @@ const ManageDishes = () => {
                     
                     {viewMode === 'grid' ? (
                       <>
-                        <div className="relative pb-[100%]">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="absolute inset-0 w-full h-full object-cover rounded-md"
-                          />
+                        <div className="relative h-48 w-full">
+                          {isValidImageUrl(item.image) ? (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="absolute inset-0 w-full h-full object-cover rounded-md"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
+                              <Utensils size={48} className="text-gray-400" />
+                            </div>
+                          )}
                         </div>
                         <div className="p-3">
                           <p className="text-gray-500 text-sm">{item.category}</p>
-                          <h3 className="font-medium">{item.name}</h3>
+                          <h3 className="font-medium truncate">{item.name}</h3>
                           <p className="text-teal-600 font-medium mt-1">${item.price.toFixed(2)}</p>
                         </div>
                       </>
                     ) : (
                       <>
                         <div className="w-16 h-16 flex-none">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover rounded-md"
-                          />
+                          {isValidImageUrl(item.image) ? (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-full object-cover rounded-md"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
+                              <Utensils size={20} className="text-gray-400" />
+                            </div>
+                          )}
                         </div>
                         <div className="ml-3 flex-grow">
                           <p className="text-gray-500 text-sm">{item.category}</p>
