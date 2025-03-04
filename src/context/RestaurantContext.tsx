@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { activeOrders, tables, menuItems, menuCategories, currentUser, reservations, customers, activeOrderDetails } from '@/data/mockData';
-import { Order, Table, MenuItem, Category, UserProfile, Reservation, Customer, OrderStatus } from '@/lib/types';
+import { Order, Table, MenuItem, Category, UserProfile, Reservation, Customer, OrderStatus, TableStatus, ReservationStatus } from '@/lib/types';
 import { toast } from 'sonner';
 
 interface RestaurantContextType {
@@ -29,6 +29,11 @@ interface RestaurantContextType {
   updateMenuItem: (menuItem: MenuItem) => void;
   deleteMenuItem: (menuItemId: string) => void;
   addCategory: (category: Category) => void;
+  
+  updateTableStatus: (tableId: string, status: TableStatus) => void;
+  addReservation: (reservation: Partial<Reservation>) => void;
+  updateReservation: (reservationId: string, status: ReservationStatus) => void;
+  cancelReservation: (reservationId: string) => void;
 }
 
 const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
@@ -41,6 +46,8 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [menuItemsList, setMenuItemsList] = useState<MenuItem[]>(menuItems);
   const [categoriesList, setCategoriesList] = useState<Category[]>(menuCategories);
+  const [tablesList, setTablesList] = useState<Table[]>(tables);
+  const [reservationsList, setReservationsList] = useState<Reservation[]>(reservations);
   const [orderItems, setOrderItems] = useState<any[]>([]);
 
   const updateOrderStatus = (orderId: string, status: OrderStatus) => {
@@ -97,15 +104,83 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     toast(`Added new category: ${category.name}`);
   };
 
+  const updateTableStatus = (tableId: string, status: TableStatus) => {
+    setTablesList(prevTables => 
+      prevTables.map(table => 
+        table.id === tableId 
+          ? { ...table, status } 
+          : table
+      )
+    );
+    
+    toast(`Table status updated to ${status}`);
+  };
+
+  const addReservation = (reservation: Partial<Reservation>) => {
+    const newReservation: Reservation = {
+      id: `res${reservationsList.length + 1}`,
+      tableId: reservation.tableId || '',
+      customerName: reservation.customerName || 'Guest',
+      customerPhone: reservation.customerPhone || '',
+      guests: reservation.guests || 1,
+      time: reservation.time || new Date(),
+      status: ReservationStatus.Confirmed,
+      notes: reservation.notes || '',
+    };
+    
+    setReservationsList(prev => [...prev, newReservation]);
+    
+    if (newReservation.tableId) {
+      updateTableStatus(newReservation.tableId, TableStatus.Reserved);
+    }
+    
+    toast(`New reservation for ${newReservation.customerName} added`);
+  };
+
+  const updateReservation = (reservationId: string, status: ReservationStatus) => {
+    setReservationsList(prevReservations => 
+      prevReservations.map(reservation => {
+        if (reservation.id === reservationId) {
+          if (status === ReservationStatus.Arrived) {
+            updateTableStatus(reservation.tableId, TableStatus.Occupied);
+          }
+          
+          return { ...reservation, status };
+        }
+        return reservation;
+      })
+    );
+    
+    toast(`Reservation status updated to ${status}`);
+  };
+
+  const cancelReservation = (reservationId: string) => {
+    const reservation = reservationsList.find(r => r.id === reservationId);
+    
+    if (reservation) {
+      setReservationsList(prevReservations => 
+        prevReservations.map(r => 
+          r.id === reservationId 
+            ? { ...r, status: ReservationStatus.Cancelled } 
+            : r
+        )
+      );
+      
+      updateTableStatus(reservation.tableId, TableStatus.Available);
+      
+      toast(`Reservation for ${reservation.customerName} cancelled`);
+    }
+  };
+
   return (
     <RestaurantContext.Provider
       value={{
         user: currentUser,
         orders,
-        tables,
+        tables: tablesList,
         menuItems: menuItemsList,
         categories: categoriesList,
-        reservations,
+        reservations: reservationsList,
         customers,
         activeOrderDetails,
         currentView,
@@ -123,6 +198,10 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         updateMenuItem,
         deleteMenuItem,
         addCategory,
+        updateTableStatus,
+        addReservation,
+        updateReservation,
+        cancelReservation,
       }}
     >
       {children}
