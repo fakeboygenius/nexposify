@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react';
 import { useRestaurant } from '@/context/RestaurantContext';
-import { Edit, Trash2, Printer, Plus, Minus } from 'lucide-react';
+import { Edit, Trash2, Printer, Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { OrderStatus, PaymentMethod } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 const OrderLine = () => {
-  const { orders, activeOrderDetails, updateOrderStatus, selectOrder } = useRestaurant();
+  const { orders, activeOrderDetails, updateOrderStatus, selectOrder, addOrderItem } = useRestaurant();
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -48,6 +48,13 @@ const OrderLine = () => {
       ...prev,
       [itemId]: Math.max(0, (prev[itemId] || 0) + change)
     }));
+  };
+
+  const handleAddToOrder = (name: string, price: number, itemId: string, quantity: number) => {
+    if (quantity > 0) {
+      const menuItem = { id: itemId, name, price };
+      addOrderItem(menuItem, quantity);
+    }
   };
 
   const getStatusBadgeColor = (status: OrderStatus) => {
@@ -130,7 +137,7 @@ const OrderLine = () => {
           count={orders.filter(o => o.status === OrderStatus.DineIn).length}
           isActive={selectedStatus === 'dine-in'} 
           onClick={() => handleStatusChange('dine-in')}
-          color="bg-green-500"
+          color="bg-teal-500"
         />
         <StatusButton 
           label="Wait List" 
@@ -204,7 +211,7 @@ const OrderLine = () => {
 
         {/* Order Details - Right Side */}
         <div className="w-2/5 bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex justify-between items-start mb-6">
+          <div className="flex justify-between items-start mb-4">
             <div>
               <h2 className="text-xl font-bold">Table No #{activeOrderDetails.tableNumber}</h2>
               <p className="text-gray-600">Order #{activeOrderDetails.orderNumber}</p>
@@ -223,19 +230,23 @@ const OrderLine = () => {
             <p className="text-gray-700">{activeOrderDetails.people} People</p>
           </div>
 
-          <h3 className="font-bold mb-4 text-lg">Ordered Items</h3>
-          <div className="space-y-3 mb-6 max-h-[250px] overflow-y-auto">
-            {activeOrderDetails.items.map((item: any) => (
-              <div key={item.id} className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium">{item.quantity}x {item.name}</p>
+          <div className="mb-4">
+            <h3 className="font-bold mb-3">Ordered Items</h3>
+            <div className="space-y-3 max-h-[180px] overflow-y-auto">
+              {activeOrderDetails.items.map((item: any) => (
+                <div key={item.id} className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <span className="text-gray-500">{item.quantity}x</span>
+                    <span className="ml-2">{item.name}</span>
+                  </div>
+                  <p className="font-medium">${item.price.toFixed(2)}</p>
                 </div>
-                <p className="font-medium">${item.price.toFixed(2)}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          <div className="border-t border-gray-200 pt-4 mb-6">
+          <div className="border-t border-gray-200 pt-4 mb-4">
+            <h3 className="font-bold mb-3">Payment Summary</h3>
             <div className="space-y-2">
               <div className="flex justify-between">
                 <p className="text-gray-700">Subtotal</p>
@@ -252,7 +263,7 @@ const OrderLine = () => {
             </div>
           </div>
 
-          <div className="border-t border-gray-200 pt-4 mb-6">
+          <div className="border-t border-gray-200 pt-4 mb-4">
             <div className="flex justify-between">
               <p className="font-bold">Total Payable</p>
               <p className="font-bold">${activeOrderDetails.total.toFixed(2)}</p>
@@ -260,9 +271,9 @@ const OrderLine = () => {
           </div>
 
           <div className="mb-6">
-            <h3 className="font-bold mb-4">Payment Method</h3>
+            <h3 className="font-bold mb-3">Payment Method</h3>
             <div className="flex gap-3">
-              <Button variant="outline" className={cn(activeOrderDetails.paymentMethod === PaymentMethod.Cash && "border-teal-500 bg-teal-50")}>
+              <Button variant="outline" className={cn("w-20", activeOrderDetails.paymentMethod === PaymentMethod.Cash && "border-teal-500 bg-teal-50")}>
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 rounded-full border flex items-center justify-center">
                     {activeOrderDetails.paymentMethod === PaymentMethod.Cash && 
@@ -271,7 +282,7 @@ const OrderLine = () => {
                   Cash
                 </span>
               </Button>
-              <Button variant="outline" className={cn(activeOrderDetails.paymentMethod === PaymentMethod.Card && "border-teal-500 bg-teal-50")}>
+              <Button variant="outline" className={cn("w-20", activeOrderDetails.paymentMethod === PaymentMethod.Card && "border-teal-500 bg-teal-50")}>
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 rounded-full border flex items-center justify-center">
                     {activeOrderDetails.paymentMethod === PaymentMethod.Card && 
@@ -280,7 +291,7 @@ const OrderLine = () => {
                   Card
                 </span>
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" className="w-20">
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 rounded-full border flex items-center justify-center"></span>
                   Scan
@@ -289,7 +300,7 @@ const OrderLine = () => {
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-3 mb-4">
             <Button variant="outline" className="flex items-center gap-2">
               <Printer size={16} />
               Print
@@ -301,117 +312,140 @@ const OrderLine = () => {
 
       {/* Menu Categories */}
       <div className="mt-8">
-        <h2 className="text-xl font-bold mb-4">Foodies Menu</h2>
         <div className="flex justify-between items-center mb-4">
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            <MenuCategoryButton 
-              name="All Menu" 
-              count={154} 
-              isActive={true} 
-              icon="🍽️" 
-            />
-            <MenuCategoryButton 
-              name="Special" 
-              count={12} 
-              isActive={false} 
-              icon="🌟" 
-            />
-            <MenuCategoryButton 
-              name="Soups" 
-              count={3} 
-              isActive={false} 
-              icon="🥣" 
-            />
-            <MenuCategoryButton 
-              name="Desserts" 
-              count={19} 
-              isActive={false} 
-              icon="🍰" 
-            />
-            <MenuCategoryButton 
-              name="Chickens" 
-              count={10} 
-              isActive={false} 
-              icon="🍗" 
-            />
-          </div>
+          <h2 className="text-xl font-bold">Foodies Menu</h2>
           <div className="flex gap-2">
-            <button className="p-2 rounded-full bg-gray-100">
-              <span className="sr-only">Previous</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-            <button className="p-2 rounded-full bg-gray-100">
-              <span className="sr-only">Next</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
+            <Button variant="ghost" size="sm" className="rounded-full p-2 h-auto w-auto">
+              <ChevronLeft size={18} />
+            </Button>
+            <Button variant="ghost" size="sm" className="rounded-full p-2 h-auto w-auto">
+              <ChevronRight size={18} />
+            </Button>
           </div>
+        </div>
+        
+        <div className="flex gap-3 overflow-x-auto mb-6 pb-2">
+          <MenuCategoryButton 
+            name="All Menu" 
+            count={154} 
+            isActive={true} 
+            icon="🍽️" 
+          />
+          <MenuCategoryButton 
+            name="Special" 
+            count={12} 
+            isActive={false} 
+            icon="🌟" 
+          />
+          <MenuCategoryButton 
+            name="Soups" 
+            count={3} 
+            isActive={false} 
+            icon="🥣" 
+          />
+          <MenuCategoryButton 
+            name="Desserts" 
+            count={19} 
+            isActive={false} 
+            icon="🍰" 
+          />
+          <MenuCategoryButton 
+            name="Chickens" 
+            count={10} 
+            isActive={false} 
+            icon="🍗" 
+          />
         </div>
 
         {/* Menu Items Grid */}
         <div className="grid grid-cols-4 gap-4 mb-6">
           <FoodMenuItem 
+            id="ordit1"
             name="Grilled Salmon Steak" 
             category="Lunch"
             price={15.00}
             quantity={quantities['ordit1'] || 0}
             onIncrease={() => handleQuantityChange('ordit1', 1)}
             onDecrease={() => handleQuantityChange('ordit1', -1)}
+            onAdd={() => handleAddToOrder("Grilled Salmon Steak", 15.0, "ordit1", quantities['ordit1'] || 0)}
+            image="/placeholder.svg"
           />
           <FoodMenuItem 
+            id="ordit2"
             name="Tofu Poke Bowl" 
             category="Salad"
             price={7.00}
             quantity={quantities['ordit2'] || 0}
             onIncrease={() => handleQuantityChange('ordit2', 1)}
             onDecrease={() => handleQuantityChange('ordit2', -1)}
+            onAdd={() => handleAddToOrder("Tofu Poke Bowl", 7.0, "ordit2", quantities['ordit2'] || 0)}
+            image="/placeholder.svg"
           />
           <FoodMenuItem 
+            id="ordit3"
             name="Pasta with Roast Beef" 
             category="Pasta"
             price={10.00}
             quantity={quantities['ordit3'] || 0}
             onIncrease={() => handleQuantityChange('ordit3', 1)}
             onDecrease={() => handleQuantityChange('ordit3', -1)}
+            onAdd={() => handleAddToOrder("Pasta with Roast Beef", 10.0, "ordit3", quantities['ordit3'] || 0)}
+            image="/placeholder.svg"
           />
           <FoodMenuItem 
+            id="ordit4"
             name="Beef Steak" 
             category="Beef"
             price={30.00}
             quantity={quantities['ordit4'] || 0}
             onIncrease={() => handleQuantityChange('ordit4', 1)}
             onDecrease={() => handleQuantityChange('ordit4', -1)}
+            onAdd={() => handleAddToOrder("Beef Steak", 30.0, "ordit4", quantities['ordit4'] || 0)}
+            image="/placeholder.svg"
           />
           <FoodMenuItem 
+            id="ordit5"
             name="Shrimp Rice Bowl" 
             category="Rice"
             price={6.00}
             quantity={quantities['ordit5'] || 0}
             onIncrease={() => handleQuantityChange('ordit5', 1)}
             onDecrease={() => handleQuantityChange('ordit5', -1)}
+            onAdd={() => handleAddToOrder("Shrimp Rice Bowl", 6.0, "ordit5", quantities['ordit5'] || 0)}
+            image="/placeholder.svg"
           />
           <FoodMenuItem 
+            id="ordit6"
             name="Apple Stuffed Pancake" 
             category="Dessert"
             price={35.00}
             quantity={quantities['ordit6'] || 0}
             onIncrease={() => handleQuantityChange('ordit6', 1)}
             onDecrease={() => handleQuantityChange('ordit6', -1)}
+            onAdd={() => handleAddToOrder("Apple Stuffed Pancake", 35.0, "ordit6", quantities['ordit6'] || 0)}
+            image="/placeholder.svg"
           />
           <FoodMenuItem 
+            id="ordit7"
             name="Chicken Quinoa & Herbs" 
             category="Chicken"
             price={12.00}
             quantity={quantities['ordit7'] || 0}
             onIncrease={() => handleQuantityChange('ordit7', 1)}
             onDecrease={() => handleQuantityChange('ordit7', -1)}
+            onAdd={() => handleAddToOrder("Chicken Quinoa & Herbs", 12.0, "ordit7", quantities['ordit7'] || 0)}
+            image="/placeholder.svg"
           />
           <FoodMenuItem 
+            id="ordit8"
             name="Vegetable Shrimp" 
             category="Salad"
             price={10.00}
             quantity={quantities['ordit8'] || 0}
             onIncrease={() => handleQuantityChange('ordit8', 1)}
             onDecrease={() => handleQuantityChange('ordit8', -1)}
+            onAdd={() => handleAddToOrder("Vegetable Shrimp", 10.0, "ordit8", quantities['ordit8'] || 0)}
+            image="/placeholder.svg"
           />
         </div>
       </div>
@@ -477,31 +511,37 @@ const MenuCategoryButton: React.FC<MenuCategoryButtonProps> = ({ name, count, is
 
 // Component for Food Menu Items
 interface FoodMenuItemProps {
+  id: string;
   name: string;
   category: string;
   price: number;
   quantity: number;
+  image: string;
   onIncrease: () => void;
   onDecrease: () => void;
+  onAdd: () => void;
 }
 
 const FoodMenuItem: React.FC<FoodMenuItemProps> = ({ 
+  id,
   name, 
   category, 
   price, 
   quantity,
+  image,
   onIncrease,
-  onDecrease
+  onDecrease,
+  onAdd
 }) => (
   <div className="menu-item border border-gray-200 rounded-lg overflow-hidden">
     <div className="bg-gray-100 h-28 flex items-center justify-center">
-      <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center overflow-hidden">
-        <img src="/placeholder.svg" alt={name} className="w-10 h-10 opacity-40" />
+      <div className="rounded-full w-20 h-20 bg-white flex items-center justify-center overflow-hidden">
+        <img src={image} alt={name} className="w-14 h-14 opacity-40" />
       </div>
     </div>
     <div className="p-3">
       <p className="text-xs text-gray-500 mb-1">{category}</p>
-      <p className="font-medium text-sm mb-2">{name}</p>
+      <p className="font-medium text-sm mb-2 truncate">{name}</p>
       <div className="flex justify-between items-center">
         <p className="font-bold">${price.toFixed(2)}</p>
         <div className="flex items-center gap-2">
