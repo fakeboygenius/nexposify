@@ -18,8 +18,8 @@ const Layout = () => {
           <UserProfile />
         </div>
         
-        <main className="flex-1 overflow-auto">
-          <div className="bg-white h-full">
+        <main className="flex-1 overflow-auto bg-gray-50">
+          <div className="h-full">
             <Outlet />
           </div>
         </main>
