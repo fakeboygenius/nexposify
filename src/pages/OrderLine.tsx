@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { useRestaurant } from '@/context/RestaurantContext';
-import { Edit, Trash2, Printer, Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
-import { OrderStatus, PaymentMethod } from '@/lib/types';
+import { Edit, Trash2, Printer, Plus, Minus, ChevronLeft, ChevronRight, Utensils } from 'lucide-react';
+import { OrderStatus, PaymentMethod, MenuItem } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -52,7 +52,15 @@ const OrderLine = () => {
 
   const handleAddToOrder = (name: string, price: number, itemId: string, quantity: number) => {
     if (quantity > 0) {
-      const menuItem = { id: itemId, name, price };
+      // Create a complete MenuItem object with all required properties
+      const menuItem: MenuItem = {
+        id: itemId,
+        name,
+        price,
+        category: "Menu", // Default category
+        image: "https://images.pexels.com/photos/13573663/pexels-photo-13573663.jpeg", // Default image
+        available: true // Assuming the item is available since we're adding it
+      };
       addOrderItem(menuItem, quantity);
     }
   };
