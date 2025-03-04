@@ -18,8 +18,8 @@ const Layout = () => {
           <UserProfile />
         </div>
         
-        <main className="flex-1 p-6 overflow-auto">
-          <div className="bg-white rounded-xl shadow-sm p-6 max-w-[1200px] mx-auto">
+        <main className="flex-1 overflow-auto">
+          <div className="bg-white h-full">
             <Outlet />
           </div>
         </main>
