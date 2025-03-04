@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useRestaurant } from '@/context/RestaurantContext';
 import { Edit, Trash2, Printer, Plus, Minus, ChevronLeft, ChevronRight, Utensils } from 'lucide-react';
@@ -170,151 +169,149 @@ const OrderLine = () => {
         />
       </div>
 
-      <div className="flex gap-6">
-        {/* Order Cards - Left Side */}
-        <div className="w-3/5 grid grid-cols-3 gap-4">
-          {filteredOrders.length > 0 ? (
-            filteredOrders.map((order) => (
-              <div 
-                key={order.id}
-                onClick={() => handleOrderSelect(order.id)}
-                className={cn(
-                  "order-item p-4 rounded-lg cursor-pointer border", 
-                  selectedOrderId === order.id ? "border-teal-500 shadow-md" : "border-gray-200",
-                  order.status === OrderStatus.WaitList && "bg-orange-50",
-                  order.status === OrderStatus.InKitchen && "bg-teal-50",
-                  order.status === OrderStatus.Ready && "bg-purple-50"
-                )}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="font-medium text-gray-800">Order #{order.id.slice(-5)}</p>
-                    <p className="text-sm">Table {order.tableNumber}</p>
-                  </div>
-                  <div>
-                    <Badge className={getStatusBadgeColor(order.status)}>
-                      {order.status.replace('-', ' ')}
-                    </Badge>
-                  </div>
+      {/* Horizontal Orders Row */}
+      <div className="flex overflow-x-auto gap-4 mb-8 pb-4">
+        {filteredOrders.length > 0 ? (
+          filteredOrders.map((order) => (
+            <div 
+              key={order.id}
+              onClick={() => handleOrderSelect(order.id)}
+              className={cn(
+                "order-item p-4 rounded-lg cursor-pointer border min-w-[220px]", 
+                selectedOrderId === order.id ? "border-teal-500 shadow-md" : "border-gray-200",
+                order.status === OrderStatus.WaitList && "bg-orange-50",
+                order.status === OrderStatus.InKitchen && "bg-teal-50",
+                order.status === OrderStatus.Ready && "bg-purple-50"
+              )}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="font-medium text-gray-800">Order #{order.id.slice(-5)}</p>
+                  <p className="text-sm">Table {order.tableNumber}</p>
                 </div>
-
-                <div className="mb-3">
-                  <p className="text-sm font-bold">Item: {order.items.reduce((acc, item) => acc + item.quantity, 0)}x</p>
-                </div>
-
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-xs text-gray-500">
-                    {Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 60000)} mins ago
-                  </span>
-                  {getStatusActionButton(order.status, order.id)}
+                <div>
+                  <Badge className={getStatusBadgeColor(order.status)}>
+                    {order.status.replace('-', ' ')}
+                  </Badge>
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="col-span-3 text-center py-10 bg-gray-50 rounded-lg">
-              <p className="text-gray-500">No orders with the selected status</p>
+
+              <div className="mb-3">
+                <p className="text-sm font-bold">Item: {order.items.reduce((acc, item) => acc + item.quantity, 0)}x</p>
+              </div>
+
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-xs text-gray-500">
+                  {Math.floor((Date.now() - new Date(order.createdAt).getTime()) / 60000)} mins ago
+                </span>
+                {getStatusActionButton(order.status, order.id)}
+              </div>
             </div>
-          )}
+          ))
+        ) : (
+          <div className="text-center py-10 bg-gray-50 rounded-lg w-full">
+            <p className="text-gray-500">No orders with the selected status</p>
+          </div>
+        )}
+      </div>
+
+      {/* Order Details Section - Now it's below the horizontal orders row */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 mb-8">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h2 className="text-xl font-bold">Table No #{activeOrderDetails.tableNumber}</h2>
+            <p className="text-gray-600">Order #{activeOrderDetails.orderNumber}</p>
+          </div>
+          <div className="flex gap-2">
+            <button className="p-2 rounded-lg text-gray-500 hover:bg-gray-100">
+              <Edit size={18} />
+            </button>
+            <button className="p-2 rounded-lg text-red-500 hover:bg-red-50">
+              <Trash2 size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* Order Details - Right Side */}
-        <div className="w-2/5 bg-white rounded-lg border border-gray-200 p-4">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <h2 className="text-xl font-bold">Table No #{activeOrderDetails.tableNumber}</h2>
-              <p className="text-gray-600">Order #{activeOrderDetails.orderNumber}</p>
-            </div>
-            <div className="flex gap-2">
-              <button className="p-2 rounded-lg text-gray-500 hover:bg-gray-100">
-                <Edit size={18} />
-              </button>
-              <button className="p-2 rounded-lg text-red-500 hover:bg-red-50">
-                <Trash2 size={18} />
-              </button>
-            </div>
-          </div>
+        <div className="flex justify-between items-center mb-4">
+          <p className="text-gray-700">{activeOrderDetails.people} People</p>
+        </div>
 
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-gray-700">{activeOrderDetails.people} People</p>
-          </div>
-
-          <div className="mb-4">
-            <h3 className="font-bold mb-3">Ordered Items</h3>
-            <div className="space-y-3 max-h-[180px] overflow-y-auto">
-              {activeOrderDetails.items.map((item: any) => (
-                <div key={item.id} className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <span className="text-gray-500">{item.quantity}x</span>
-                    <span className="ml-2">{item.name}</span>
-                  </div>
-                  <p className="font-medium">${item.price.toFixed(2)}</p>
+        <div className="mb-4">
+          <h3 className="font-bold mb-3">Ordered Items</h3>
+          <div className="space-y-3 max-h-[180px] overflow-y-auto">
+            {activeOrderDetails.items.map((item: any) => (
+              <div key={item.id} className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <span className="text-gray-500">{item.quantity}x</span>
+                  <span className="ml-2">{item.name}</span>
                 </div>
-              ))}
-            </div>
+                <p className="font-medium">${item.price.toFixed(2)}</p>
+              </div>
+            ))}
           </div>
+        </div>
 
-          <div className="border-t border-gray-200 pt-4 mb-4">
-            <h3 className="font-bold mb-3">Payment Summary</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <p className="text-gray-700">Subtotal</p>
-                <p className="font-medium">${activeOrderDetails.subtotal.toFixed(2)}</p>
-              </div>
-              <div className="flex justify-between">
-                <p className="text-gray-700">Tax</p>
-                <p className="font-medium">${activeOrderDetails.tax.toFixed(2)}</p>
-              </div>
-              <div className="flex justify-between">
-                <p className="text-gray-700">Donation for Palestine</p>
-                <p className="font-medium">${activeOrderDetails.donation.toFixed(2)}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-200 pt-4 mb-4">
+        <div className="border-t border-gray-200 pt-4 mb-4">
+          <h3 className="font-bold mb-3">Payment Summary</h3>
+          <div className="space-y-2">
             <div className="flex justify-between">
-              <p className="font-bold">Total Payable</p>
-              <p className="font-bold">${activeOrderDetails.total.toFixed(2)}</p>
+              <p className="text-gray-700">Subtotal</p>
+              <p className="font-medium">${activeOrderDetails.subtotal.toFixed(2)}</p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-gray-700">Tax</p>
+              <p className="font-medium">${activeOrderDetails.tax.toFixed(2)}</p>
+            </div>
+            <div className="flex justify-between">
+              <p className="text-gray-700">Donation for Palestine</p>
+              <p className="font-medium">${activeOrderDetails.donation.toFixed(2)}</p>
             </div>
           </div>
+        </div>
 
-          <div className="mb-6">
-            <h3 className="font-bold mb-3">Payment Method</h3>
-            <div className="flex gap-3">
-              <Button variant="outline" className={cn("w-20", activeOrderDetails.paymentMethod === PaymentMethod.Cash && "border-teal-500 bg-teal-50")}>
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full border flex items-center justify-center">
-                    {activeOrderDetails.paymentMethod === PaymentMethod.Cash && 
-                      <span className="w-2 h-2 rounded-full bg-teal-500"></span>}
-                  </span>
-                  Cash
-                </span>
-              </Button>
-              <Button variant="outline" className={cn("w-20", activeOrderDetails.paymentMethod === PaymentMethod.Card && "border-teal-500 bg-teal-50")}>
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full border flex items-center justify-center">
-                    {activeOrderDetails.paymentMethod === PaymentMethod.Card && 
-                      <span className="w-2 h-2 rounded-full bg-teal-500"></span>}
-                  </span>
-                  Card
-                </span>
-              </Button>
-              <Button variant="outline" className="w-20">
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 rounded-full border flex items-center justify-center"></span>
-                  Scan
-                </span>
-              </Button>
-            </div>
+        <div className="border-t border-gray-200 pt-4 mb-4">
+          <div className="flex justify-between">
+            <p className="font-bold">Total Payable</p>
+            <p className="font-bold">${activeOrderDetails.total.toFixed(2)}</p>
           </div>
+        </div>
 
-          <div className="flex gap-3 mb-4">
-            <Button variant="outline" className="flex items-center gap-2">
-              <Printer size={16} />
-              Print
+        <div className="mb-6">
+          <h3 className="font-bold mb-3">Payment Method</h3>
+          <div className="flex gap-3">
+            <Button variant="outline" className={cn("w-20", activeOrderDetails.paymentMethod === PaymentMethod.Cash && "border-teal-500 bg-teal-50")}>
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full border flex items-center justify-center">
+                  {activeOrderDetails.paymentMethod === PaymentMethod.Cash && 
+                    <span className="w-2 h-2 rounded-full bg-teal-500"></span>}
+                </span>
+                Cash
+              </span>
             </Button>
-            <Button className="flex-1 bg-teal-500 hover:bg-teal-600">Place Order</Button>
+            <Button variant="outline" className={cn("w-20", activeOrderDetails.paymentMethod === PaymentMethod.Card && "border-teal-500 bg-teal-50")}>
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full border flex items-center justify-center">
+                  {activeOrderDetails.paymentMethod === PaymentMethod.Card && 
+                    <span className="w-2 h-2 rounded-full bg-teal-500"></span>}
+                </span>
+                Card
+              </span>
+            </Button>
+            <Button variant="outline" className="w-20">
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full border flex items-center justify-center"></span>
+                Scan
+              </span>
+            </Button>
           </div>
+        </div>
+
+        <div className="flex gap-3">
+          <Button variant="outline" className="flex items-center gap-2">
+            <Printer size={16} />
+            Print
+          </Button>
+          <Button className="flex-1 bg-teal-500 hover:bg-teal-600">Place Order</Button>
         </div>
       </div>
 
@@ -366,7 +363,7 @@ const OrderLine = () => {
         </div>
 
         {/* Menu Items Grid */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-4 gap-4">
           <FoodMenuItem 
             id="ordit1"
             name="Grilled Salmon Steak" 
