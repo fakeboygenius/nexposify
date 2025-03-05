@@ -3,7 +3,20 @@ import React, { useState } from 'react';
 import { useRestaurant } from '@/context/RestaurantContext';
 import { Button } from '@/components/ui/button';
 import { OrderStatus, PaymentStatus } from '@/lib/types';
-import { ChevronLeft, Plus, Edit, Trash2, Clock, Printer, Search, ArrowUpDown, PenTool, FileText, CreditCard } from 'lucide-react';
+import { 
+  ChevronLeft, 
+  Plus, 
+  Edit, 
+  Trash2, 
+  Clock, 
+  Printer, 
+  Search, 
+  CreditCard, 
+  FileText, 
+  PenTool,
+  Menu,
+  List
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
@@ -22,6 +35,7 @@ const POSTickets: React.FC<POSTicketsProps> = ({
   const { orders, tables } = useRestaurant();
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
   const [showTicketDetails, setShowTicketDetails] = useState(false);
+  const [orderType, setOrderType] = useState<'dine-in' | 'takeout' | 'delivery' | 'curbside'>('dine-in');
   
   // Find the table details
   const table = tables.find(t => t.id === tableId);
@@ -49,6 +63,10 @@ const POSTickets: React.FC<POSTicketsProps> = ({
     if (selectedTicket) {
       onTicketSelect(selectedTicket);
     }
+  };
+
+  const handleOrderTypeChange = (type: 'dine-in' | 'takeout' | 'delivery' | 'curbside') => {
+    setOrderType(type);
   };
 
   const getOrderStatusStyle = (status: OrderStatus) => {
@@ -251,26 +269,88 @@ const POSTickets: React.FC<POSTicketsProps> = ({
             </div>
           </div>
           
-          {/* Order Type */}
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 px-3 py-1">
-              Dine In
-            </Badge>
-            <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200 px-3 py-1">
-              Takeout
-            </Badge>
-            <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200 px-3 py-1">
-              Delivery
-            </Badge>
-            <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200 px-3 py-1">
-              Curbside
-            </Badge>
+          {/* Order Type Selection */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm font-medium text-gray-700">Order Type:</div>
+            <div className="flex gap-2">
+              <Button 
+                variant={orderType === 'dine-in' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => handleOrderTypeChange('dine-in')}
+                className="text-xs px-3"
+              >
+                Dine In
+              </Button>
+              <Button 
+                variant={orderType === 'takeout' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => handleOrderTypeChange('takeout')}
+                className="text-xs px-3"
+              >
+                Takeout
+              </Button>
+              <Button 
+                variant={orderType === 'delivery' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => handleOrderTypeChange('delivery')}
+                className="text-xs px-3"
+              >
+                Delivery
+              </Button>
+              <Button 
+                variant={orderType === 'curbside' ? 'default' : 'outline'} 
+                size="sm"
+                onClick={() => handleOrderTypeChange('curbside')}
+                className="text-xs px-3"
+              >
+                Curbside
+              </Button>
+            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="mb-4 flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" className="border-gray-200 bg-gray-50">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span className="ml-1">History</span>
+            </Button>
+            <Button variant="outline" size="sm" className="border-gray-200 bg-gray-50">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span className="ml-1">Discount</span>
+            </Button>
+            <Button variant="outline" size="sm" className="border-gray-200 bg-gray-50">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="6" width="18" height="15" rx="2" stroke="currentColor" strokeWidth="2"/>
+                <path d="M3 10h18M8 3v6M16 3v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span className="ml-1">Coupon</span>
+            </Button>
+            <Button variant="outline" size="sm" className="border-gray-200 bg-gray-50">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 9h8M8 13h5M8 17h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="2"/>
+              </svg>
+              <span className="ml-1">Note</span>
+            </Button>
           </div>
           
           {/* Order Items */}
           <div className="bg-white rounded-lg border mb-4">
-            <div className="p-3 border-b bg-gray-50 font-medium">
-              Order Items
+            <div className="p-3 border-b bg-gray-50 font-medium flex justify-between items-center">
+              <span>Order Items</span>
+              <div className="flex items-center gap-2">
+                <button className="p-1 rounded hover:bg-gray-200">
+                  <Menu size={16} className="text-gray-500" />
+                </button>
+                <button className="p-1 rounded hover:bg-gray-200">
+                  <List size={16} className="text-gray-500" />
+                </button>
+              </div>
             </div>
             
             {selectedOrder.items.map((item, index) => (
@@ -290,7 +370,7 @@ const POSTickets: React.FC<POSTicketsProps> = ({
                       {item.modifiers && item.modifiers.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1">
                           {item.modifiers.map((mod, i) => (
-                            <Badge key={i} variant="outline" className="text-xs bg-red-50 text-red-700 border-red-100">
+                            <Badge key={i} variant="red" className="text-xs">
                               {mod}
                             </Badge>
                           ))}
@@ -302,6 +382,14 @@ const POSTickets: React.FC<POSTicketsProps> = ({
                     <p className="font-bold">${(item.price * item.quantity).toFixed(2)}</p>
                     <p className="text-xs text-gray-500">${item.price.toFixed(2)} each</p>
                   </div>
+                </div>
+                <div className="flex justify-end gap-2 mt-2">
+                  <Button variant="outline" size="sm" className="h-7 px-2 text-xs">
+                    <Edit size={14} />
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-7 px-2 text-xs text-red-600 hover:text-red-700">
+                    <Trash2 size={14} />
+                  </Button>
                 </div>
               </div>
             ))}
