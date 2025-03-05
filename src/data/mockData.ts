@@ -1,4 +1,3 @@
-
 import { OrderStatus, TableStatus, MenuItem, Order, Table, Category, UserProfile, UserRole, Customer, Reservation, ReservationStatus, PaymentStatus, PaymentMethod } from "@/lib/types";
 
 export const currentUser: UserProfile = {
@@ -156,18 +155,18 @@ export const menuItems: MenuItem[] = [
 ];
 
 export const tables: Table[] = [
-  { id: "table1", number: "#1", capacity: 6, status: TableStatus.Available, section: "Main Dining" },
-  { id: "table2", number: "#2", capacity: 2, status: TableStatus.Reserved, section: "Main Dining" },
-  { id: "table3", number: "#3", capacity: 2, status: TableStatus.Available, section: "Main Dining" },
-  { id: "table4", number: "#4", capacity: 3, status: TableStatus.Occupied, section: "Main Dining" },
-  { id: "table5", number: "#5", capacity: 2, status: TableStatus.Available, section: "Main Dining" },
-  { id: "table6", number: "#6", capacity: 7, status: TableStatus.Available, section: "Main Dining" },
-  { id: "table7", number: "#7", capacity: 10, status: TableStatus.Available, section: "Main Dining" },
-  { id: "table8", number: "#8", capacity: 2, status: TableStatus.Reserved, section: "Main Dining" },
-  { id: "table9", number: "#9", capacity: 4, status: TableStatus.Reserved, section: "Main Dining" },
-  { id: "table10", number: "#10", capacity: 2, status: TableStatus.Reserved, section: "Main Dining" },
-  { id: "table11", number: "#11", capacity: 2, status: TableStatus.Available, section: "Main Dining" },
-  { id: "table12", number: "#12", capacity: 8, status: TableStatus.Available, section: "Main Dining" },
+  { id: "table1", number: "#1", capacity: 6, status: TableStatus.Available, section: "Main Dining", area: "main" },
+  { id: "table2", number: "#2", capacity: 2, status: TableStatus.Reserved, section: "Main Dining", area: "main" },
+  { id: "table3", number: "#3", capacity: 2, status: TableStatus.Available, section: "Main Dining", area: "main" },
+  { id: "table4", number: "#4", capacity: 3, status: TableStatus.Occupied, section: "Main Dining", area: "main" },
+  { id: "table5", number: "#5", capacity: 2, status: TableStatus.Available, section: "Main Dining", area: "main" },
+  { id: "table6", number: "#6", capacity: 7, status: TableStatus.Available, section: "Main Dining", area: "main" },
+  { id: "table7", number: "#7", capacity: 10, status: TableStatus.Available, section: "Main Dining", area: "main" },
+  { id: "table8", number: "#8", capacity: 2, status: TableStatus.Reserved, section: "Main Dining", area: "terrace" },
+  { id: "table9", number: "#9", capacity: 4, status: TableStatus.Reserved, section: "Main Dining", area: "terrace" },
+  { id: "table10", number: "#10", capacity: 2, status: TableStatus.Reserved, section: "Main Dining", area: "bar" },
+  { id: "table11", number: "#11", capacity: 2, status: TableStatus.Available, section: "Main Dining", area: "bar" },
+  { id: "table12", number: "#12", capacity: 8, status: TableStatus.Available, section: "Main Dining", area: "bar" },
 ];
 
 export const activeOrders: Order[] = [

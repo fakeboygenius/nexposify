@@ -24,7 +24,7 @@ const POSTables: React.FC<POSTablesProps> = ({ onTableSelect }) => {
 
   // Filter tables based on selected filter
   const filteredTables = activeFilter 
-    ? tables.filter(table => table.area === activeFilter || table.status === activeFilter)
+    ? tables.filter(table => table.area === activeFilter || table.section === activeFilter || table.status === activeFilter)
     : tables;
 
   const getTableStatusIcon = (status: TableStatus) => {
@@ -165,7 +165,7 @@ const POSTables: React.FC<POSTablesProps> = ({ onTableSelect }) => {
                 <tr key={table.id} className="border-b hover:bg-gray-50">
                   <td className="p-3">Table {table.number}</td>
                   <td className="p-3">{table.capacity} seats</td>
-                  <td className="p-3">{table.area}</td>
+                  <td className="p-3">{table.area || table.section}</td>
                   <td className="p-3">
                     <div className="flex items-center gap-1">
                       {getTableStatusIcon(table.status)}

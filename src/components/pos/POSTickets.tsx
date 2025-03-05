@@ -92,7 +92,7 @@ const POSTickets: React.FC<POSTicketsProps> = ({
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500">Area</p>
-              <p className="font-medium">{table.area}</p>
+              <p className="font-medium">{table.area || table.section}</p>
             </div>
           </div>
         </div>

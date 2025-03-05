@@ -42,6 +42,7 @@ export interface Table {
   capacity: number;
   status: TableStatus;
   section: string;
+  area?: string; // Add area property with optional type
   currentOrderId?: string;
   reservationName?: string;
   reservationTime?: Date;
