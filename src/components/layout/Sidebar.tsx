@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, ListOrdered, Utensils, Users, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutGrid, ListOrdered, Utensils, Users, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRestaurant } from '@/context/RestaurantContext';
 
@@ -79,6 +79,12 @@ const Sidebar = () => {
           to="/manage-dishes" 
           icon={<Utensils size={20} />} 
           label="Manage Dishes"
+          collapsed={collapsed} 
+        />
+        <SidebarLink 
+          to="/pos" 
+          icon={<CreditCard size={20} />} 
+          label="POS System"
           collapsed={collapsed} 
         />
         <SidebarLink 
