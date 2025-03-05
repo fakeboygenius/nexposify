@@ -36,8 +36,8 @@ const POS = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="border-b pb-2 mb-4">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
+        <div className="border-b pb-2 mb-4">
           <TabsList className="grid grid-cols-4 w-full max-w-xl mx-auto">
             <TabsTrigger value="tables" className="flex items-center gap-2">
               <LayoutGrid size={18} />
@@ -68,36 +68,36 @@ const POS = () => {
               <span>Payment</span>
             </TabsTrigger>
           </TabsList>
-        </Tabs>
-      </div>
+        </div>
 
-      <div className="flex-1 overflow-auto">
-        <TabsContent value="tables" className="h-full">
-          <POSTables onTableSelect={handleTableSelect} />
-        </TabsContent>
-        
-        <TabsContent value="tickets" className="h-full">
-          <POSTickets 
-            tableId={selectedTable}
-            onTicketSelect={handleTicketSelect}
-            onBackToTables={handleBackToTables}
-          />
-        </TabsContent>
-        
-        <TabsContent value="menu" className="h-full">
-          <POSMenu 
-            ticketId={currentTicket}
-            onGoToPayment={handleGoToPayment}
-          />
-        </TabsContent>
-        
-        <TabsContent value="payment" className="h-full">
-          <POSPayment 
-            ticketId={currentTicket}
-            onFinish={handleBackToTables}
-          />
-        </TabsContent>
-      </div>
+        <div className="flex-1 overflow-auto">
+          <TabsContent value="tables" className="h-full mt-0">
+            <POSTables onTableSelect={handleTableSelect} />
+          </TabsContent>
+          
+          <TabsContent value="tickets" className="h-full mt-0">
+            <POSTickets 
+              tableId={selectedTable}
+              onTicketSelect={handleTicketSelect}
+              onBackToTables={handleBackToTables}
+            />
+          </TabsContent>
+          
+          <TabsContent value="menu" className="h-full mt-0">
+            <POSMenu 
+              ticketId={currentTicket}
+              onGoToPayment={handleGoToPayment}
+            />
+          </TabsContent>
+          
+          <TabsContent value="payment" className="h-full mt-0">
+            <POSPayment 
+              ticketId={currentTicket}
+              onFinish={handleBackToTables}
+            />
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 };
