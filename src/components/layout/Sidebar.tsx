@@ -15,7 +15,8 @@ import {
   ShoppingBag,
   Truck,
   Search,
-  Tag
+  Tag,
+  Ticket
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRestaurant } from '@/context/RestaurantContext';
