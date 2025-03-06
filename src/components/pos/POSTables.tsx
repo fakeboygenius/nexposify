@@ -2,15 +2,7 @@
 import React, { useState } from 'react';
 import { useRestaurant } from '@/context/RestaurantContext';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { TableStatus } from '@/lib/types';
-import { 
-  Coffee, 
-  Users, 
-  Clock, 
-  CircleDashed,
-  Filter 
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface POSTablesProps {
@@ -19,103 +11,86 @@ interface POSTablesProps {
 
 const POSTables: React.FC<POSTablesProps> = ({ onTableSelect }) => {
   const { tables } = useRestaurant();
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
-  // Filter tables based on selected filter
-  const filteredTables = activeFilter 
-    ? tables.filter(table => table.area === activeFilter || table.section === activeFilter || table.status === activeFilter)
-    : tables;
-
-  // Group tables by section
-  const sectionNames = ['Main Floor', 'Terrace', 'Bar'];
+  const [activeArea, setActiveArea] = useState<string | null>(null);
   
-  const getStatusColor = (status: TableStatus) => {
-    switch (status) {
-      case TableStatus.Available:
-        return 'bg-white border-gray-300 text-gray-800';
-      case TableStatus.Reserved:
-        return 'bg-yellow-100 border-yellow-300 text-yellow-800';
-      case TableStatus.Occupied:
-        return 'bg-orange-500 border-orange-600 text-white';
-      default:
-        return 'bg-white border-gray-300 text-gray-800';
-    }
-  };
+  // Get all table sections
+  const sections = ['Main Floor', 'Terrace', 'Bar'];
+  
+  // Get all unique areas
+  const areas = Array.from(new Set(tables.map(table => table.area || 'Unknown')));
+  
+  // Filter tables based on selected area
+  const filteredTables = activeArea 
+    ? tables.filter(table => table.area === activeArea)
+    : tables;
 
   return (
     <div className="h-full flex flex-col">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold">Tables</h2>
-        
-        <div className="flex gap-2">
-          {/* Table action buttons */}
+      {/* Top section with main navigation options */}
+      <div className="flex border-b mb-4 pb-2 overflow-x-auto">
+        {['Delivery', 'SambaCard', 'Tables', 'Customer Search', 'Customer Tickets', 'Customers'].map(item => (
           <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setViewMode('grid')}
-            className={viewMode === 'grid' ? 'bg-gray-100' : ''}
+            key={item}
+            variant={item === 'Tables' ? 'default' : 'ghost'}
+            className="min-w-[120px] whitespace-nowrap mx-1"
           >
-            Grid
+            {item}
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setViewMode('list')}
-            className={viewMode === 'list' ? 'bg-gray-100' : ''}
-          >
-            List
-          </Button>
-        </div>
+        ))}
       </div>
-
-      {/* Filters/Tabs for table sections - Similar to SambaPOS navigation */}
+      
+      {/* Areas/Sections filter */}
       <div className="mb-4 flex gap-1 overflow-x-auto border-b pb-2">
         <Button 
-          variant={!activeFilter ? "default" : "outline"} 
+          variant={!activeArea ? "default" : "outline"} 
           size="sm" 
-          onClick={() => setActiveFilter(null)}
+          onClick={() => setActiveArea(null)}
           className="min-w-20"
         >
           All Tables
         </Button>
-        {sectionNames.map(section => (
+        {areas.map(area => (
           <Button 
-            key={section}
-            variant={activeFilter === section.toLowerCase() ? "default" : "outline"} 
+            key={area}
+            variant={activeArea === area ? "default" : "outline"} 
             size="sm" 
-            onClick={() => setActiveFilter(section.toLowerCase())}
+            onClick={() => setActiveArea(area)}
             className="min-w-20"
           >
-            {section}
+            {area}
           </Button>
         ))}
       </div>
 
-      {/* Tables Grid - SambaPOS style */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-1 overflow-auto">
+      {/* Tables grid - SambaPOS style */}
+      <div className="grid grid-cols-7 gap-1 overflow-auto flex-1">
         {filteredTables.map(table => (
-          <div 
+          <button 
             key={table.id}
             onClick={() => onTableSelect(table.id)}
             className={cn(
-              "border-2 aspect-[4/3] flex items-center justify-center cursor-pointer transition-all",
+              "flex items-center justify-center aspect-[3/2] text-xl font-bold border-2 hover:border-blue-500",
               table.status === TableStatus.Occupied && "bg-orange-500 text-white border-orange-600",
               table.status === TableStatus.Reserved && "bg-yellow-100 border-yellow-300",
-              table.status === TableStatus.Available && "bg-white border-gray-300 hover:bg-gray-50",
-              table.status === TableStatus.Available ? "hover:border-blue-400" : ""
+              table.status === TableStatus.Available && "bg-white border-gray-300"
             )}
           >
-            <div className="text-center">
-              <div className="text-2xl font-bold">
-                {table.number}
-              </div>
-              <div className="text-xs">
-                {table.capacity} seats
-              </div>
-            </div>
-          </div>
+            {table.number}
+          </button>
         ))}
+      </div>
+      
+      {/* Bottom section with status bar */}
+      <div className="mt-4 border-t pt-2 flex justify-between text-sm text-gray-600">
+        <div className="flex gap-4">
+          <Button size="sm" variant="outline">Restaurant</Button>
+          <Button size="sm" variant="outline">FastFood</Button>
+          <Button size="sm" variant="outline">Delivery Service</Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-green-500">Connected</span>
+          <span>Administrator</span>
+        </div>
       </div>
     </div>
   );
