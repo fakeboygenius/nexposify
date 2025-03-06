@@ -27,29 +27,19 @@ const POSTables: React.FC<POSTablesProps> = ({ onTableSelect }) => {
     ? tables.filter(table => table.area === activeFilter || table.section === activeFilter || table.status === activeFilter)
     : tables;
 
-  const getTableStatusIcon = (status: TableStatus) => {
+  // Group tables by section
+  const sectionNames = ['Main Floor', 'Terrace', 'Bar'];
+  
+  const getStatusColor = (status: TableStatus) => {
     switch (status) {
       case TableStatus.Available:
-        return <CircleDashed className="text-green-500" size={18} />;
+        return 'bg-white border-gray-300 text-gray-800';
       case TableStatus.Reserved:
-        return <Clock className="text-yellow-500" size={18} />;
+        return 'bg-yellow-100 border-yellow-300 text-yellow-800';
       case TableStatus.Occupied:
-        return <Users className="text-red-500" size={18} />;
+        return 'bg-orange-500 border-orange-600 text-white';
       default:
-        return <CircleDashed className="text-gray-500" size={18} />;
-    }
-  };
-
-  const getTableStatusColor = (status: TableStatus) => {
-    switch (status) {
-      case TableStatus.Available:
-        return 'border-green-200 bg-green-50';
-      case TableStatus.Reserved:
-        return 'border-yellow-200 bg-yellow-50';
-      case TableStatus.Occupied:
-        return 'border-red-200 bg-red-50';
-      default:
-        return 'border-gray-200 bg-gray-50';
+        return 'bg-white border-gray-300 text-gray-800';
     }
   };
 
@@ -59,6 +49,7 @@ const POSTables: React.FC<POSTablesProps> = ({ onTableSelect }) => {
         <h2 className="text-xl font-bold">Tables</h2>
         
         <div className="flex gap-2">
+          {/* Table action buttons */}
           <Button 
             variant="outline" 
             size="sm" 
@@ -78,146 +69,56 @@ const POSTables: React.FC<POSTablesProps> = ({ onTableSelect }) => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-2">
-        <FilterButton 
-          label="All" 
-          isActive={!activeFilter} 
-          onClick={() => setActiveFilter(null)} 
-        />
-        <FilterButton 
-          label="Main Floor" 
-          isActive={activeFilter === 'main'} 
-          onClick={() => setActiveFilter('main')} 
-        />
-        <FilterButton 
-          label="Terrace" 
-          isActive={activeFilter === 'terrace'} 
-          onClick={() => setActiveFilter('terrace')} 
-        />
-        <FilterButton 
-          label="Bar" 
-          isActive={activeFilter === 'bar'} 
-          onClick={() => setActiveFilter('bar')} 
-        />
-        <FilterButton 
-          label="Available" 
-          isActive={activeFilter === TableStatus.Available} 
-          onClick={() => setActiveFilter(TableStatus.Available)} 
-          icon={<CircleDashed size={14} />}
-          color="text-green-500"
-        />
-        <FilterButton 
-          label="Reserved" 
-          isActive={activeFilter === TableStatus.Reserved} 
-          onClick={() => setActiveFilter(TableStatus.Reserved)} 
-          icon={<Clock size={14} />}
-          color="text-yellow-500"
-        />
-        <FilterButton 
-          label="Occupied" 
-          isActive={activeFilter === TableStatus.Occupied} 
-          onClick={() => setActiveFilter(TableStatus.Occupied)} 
-          icon={<Users size={14} />}
-          color="text-red-500"
-        />
+      {/* Filters/Tabs for table sections - Similar to SambaPOS navigation */}
+      <div className="mb-4 flex gap-1 overflow-x-auto border-b pb-2">
+        <Button 
+          variant={!activeFilter ? "default" : "outline"} 
+          size="sm" 
+          onClick={() => setActiveFilter(null)}
+          className="min-w-20"
+        >
+          All Tables
+        </Button>
+        {sectionNames.map(section => (
+          <Button 
+            key={section}
+            variant={activeFilter === section.toLowerCase() ? "default" : "outline"} 
+            size="sm" 
+            onClick={() => setActiveFilter(section.toLowerCase())}
+            className="min-w-20"
+          >
+            {section}
+          </Button>
+        ))}
       </div>
 
-      {/* Tables Grid/List */}
-      {viewMode === 'grid' ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-auto">
-          {filteredTables.map(table => (
-            <div 
-              key={table.id}
-              onClick={() => onTableSelect(table.id)}
-              className={cn(
-                "border rounded-lg p-4 flex flex-col items-center justify-center h-32 cursor-pointer transition-all hover:shadow-md",
-                getTableStatusColor(table.status)
-              )}
-            >
-              <div className="text-2xl font-bold mb-1">
+      {/* Tables Grid - SambaPOS style */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-1 overflow-auto">
+        {filteredTables.map(table => (
+          <div 
+            key={table.id}
+            onClick={() => onTableSelect(table.id)}
+            className={cn(
+              "border-2 aspect-[4/3] flex items-center justify-center cursor-pointer transition-all",
+              table.status === TableStatus.Occupied && "bg-orange-500 text-white border-orange-600",
+              table.status === TableStatus.Reserved && "bg-yellow-100 border-yellow-300",
+              table.status === TableStatus.Available && "bg-white border-gray-300 hover:bg-gray-50",
+              table.status === TableStatus.Available ? "hover:border-blue-400" : ""
+            )}
+          >
+            <div className="text-center">
+              <div className="text-2xl font-bold">
                 {table.number}
               </div>
-              <div className="text-sm text-gray-500 mb-2">
+              <div className="text-xs">
                 {table.capacity} seats
               </div>
-              <div className="flex items-center gap-1 text-xs">
-                {getTableStatusIcon(table.status)}
-                <span>{table.status}</span>
-              </div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="overflow-auto flex-1">
-          <table className="w-full border-collapse">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="text-left p-3 border-b">Table</th>
-                <th className="text-left p-3 border-b">Capacity</th>
-                <th className="text-left p-3 border-b">Area</th>
-                <th className="text-left p-3 border-b">Status</th>
-                <th className="text-left p-3 border-b">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTables.map(table => (
-                <tr key={table.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3">Table {table.number}</td>
-                  <td className="p-3">{table.capacity} seats</td>
-                  <td className="p-3">{table.area || table.section}</td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-1">
-                      {getTableStatusIcon(table.status)}
-                      <span>{table.status}</span>
-                    </div>
-                  </td>
-                  <td className="p-3">
-                    <Button 
-                      size="sm" 
-                      onClick={() => onTableSelect(table.id)}
-                    >
-                      Select
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
-
-interface FilterButtonProps {
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-  icon?: React.ReactNode;
-  color?: string;
-}
-
-const FilterButton: React.FC<FilterButtonProps> = ({ 
-  label, 
-  isActive, 
-  onClick, 
-  icon, 
-  color 
-}) => (
-  <Button
-    variant={isActive ? "default" : "outline"}
-    size="sm"
-    onClick={onClick}
-    className={cn(
-      "whitespace-nowrap",
-      icon && "flex items-center gap-1",
-      color && !isActive && color
-    )}
-  >
-    {icon}
-    {label}
-  </Button>
-);
 
 export default POSTables;

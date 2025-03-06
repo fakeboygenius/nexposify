@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useRestaurant } from '@/context/RestaurantContext';
 import { LayoutGrid, Utensils, Ticket, CreditCard } from 'lucide-react';
@@ -9,9 +10,21 @@ import POSMenu from '@/components/pos/POSMenu';
 import POSPayment from '@/components/pos/POSPayment';
 
 const POS = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('tables');
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [currentTicket, setCurrentTicket] = useState<string | null>(null);
+  
+  // Parse query params to check if we should open a specific tab
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    
+    if (tab && ['tables', 'tickets', 'menu', 'payment'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [location]);
 
   // Handle navigation between tabs based on user actions
   const handleTableSelect = (tableId: string) => {
@@ -34,9 +47,15 @@ const POS = () => {
     setActiveTab('tables');
   };
 
+  // Handle tab changes and update URL
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/pos?tab=${value}`, { replace: true });
+  };
+
   return (
     <div className="flex flex-col h-full">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full h-full flex flex-col">
         <div className="border-b pb-2 mb-4">
           <TabsList className="grid grid-cols-4 w-full max-w-xl mx-auto">
             <TabsTrigger value="tables" className="flex items-center gap-2">

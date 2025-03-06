@@ -1,7 +1,22 @@
 
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { LayoutGrid, ListOrdered, Utensils, Users, Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight, CreditCard } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { 
+  LayoutGrid, 
+  ListOrdered, 
+  Utensils, 
+  Users, 
+  Settings, 
+  HelpCircle, 
+  LogOut, 
+  ChevronLeft, 
+  ChevronRight, 
+  CreditCard,
+  ShoppingBag,
+  Truck,
+  Search,
+  Tag
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRestaurant } from '@/context/RestaurantContext';
 
@@ -13,12 +28,17 @@ interface SidebarLinkProps {
 }
 
 const SidebarLink: React.FC<SidebarLinkProps> = ({ to, icon, label, collapsed }) => {
+  const location = useLocation();
+  const isActive = location.pathname === to;
+  
   return (
     <NavLink
       to={to}
-      className={({ isActive }) =>
-        cn("sidebar-item", isActive && "active")
-      }
+      className={cn(
+        "sidebar-item flex items-center gap-3 px-3 py-2 rounded-md transition-colors", 
+        isActive ? "bg-teal-50 text-teal-700" : "hover:bg-gray-100",
+        collapsed && "justify-center p-2"
+      )}
     >
       {icon}
       {!collapsed && <span>{label}</span>}
@@ -29,13 +49,13 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({ to, icon, label, collapsed })
 const Logo = ({ collapsed }: { collapsed: boolean }) => {
   return (
     <div className={cn("flex items-center gap-2 px-4 py-6", collapsed ? "justify-center" : "")}>
-      <div className="w-10 h-10 rounded-lg bg-teal-500 flex items-center justify-center">
-        <span className="text-white font-bold text-xl">C</span>
+      <div className="w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center">
+        <span className="text-white font-bold text-xl">S</span>
       </div>
       {!collapsed && (
         <div className="flex flex-col">
-          <span className="font-bold text-teal-600">CulinaTech</span>
-          <span className="text-gray-400 text-xs">Station</span>
+          <span className="font-bold text-gray-800">SambaPOS</span>
+          <span className="text-gray-400 text-xs">Restaurant POS</span>
         </div>
       )}
     </div>
@@ -64,33 +84,45 @@ const Sidebar = () => {
           collapsed={collapsed}
         />
         <SidebarLink 
+          to="/pos" 
+          icon={<CreditCard size={20} />} 
+          label="Tables"
+          collapsed={collapsed} 
+        />
+        <SidebarLink 
           to="/order-line" 
           icon={<ListOrdered size={20} />} 
           label="Order Line"
           collapsed={collapsed} 
         />
         <SidebarLink 
-          to="/manage-table" 
-          icon={<LayoutGrid size={20} />} 
-          label="Manage Table"
-          collapsed={collapsed} 
-        />
-        <SidebarLink 
-          to="/manage-dishes" 
-          icon={<Utensils size={20} />} 
-          label="Manage Dishes"
-          collapsed={collapsed} 
-        />
-        <SidebarLink 
-          to="/pos" 
-          icon={<CreditCard size={20} />} 
-          label="POS System"
+          to="/pos?tab=tickets" 
+          icon={<Ticket size={20} />} 
+          label="Customer Tickets"
           collapsed={collapsed} 
         />
         <SidebarLink 
           to="/customers" 
           icon={<Users size={20} />} 
           label="Customers"
+          collapsed={collapsed} 
+        />
+        <SidebarLink 
+          to="/delivery" 
+          icon={<Truck size={20} />} 
+          label="Delivery"
+          collapsed={collapsed} 
+        />
+        <SidebarLink 
+          to="/loyalty" 
+          icon={<Tag size={20} />} 
+          label="SambaCard"
+          collapsed={collapsed} 
+        />
+        <SidebarLink 
+          to="/manage-dishes" 
+          icon={<Utensils size={20} />} 
+          label="Menu Items"
           collapsed={collapsed} 
         />
       </div>
@@ -110,7 +142,10 @@ const Sidebar = () => {
         />
         <NavLink
           to="/logout"
-          className="sidebar-item text-gray-600 hover:text-red-500"
+          className={cn(
+            "sidebar-item flex items-center gap-3 px-3 py-2 rounded-md text-gray-600 hover:text-red-500 hover:bg-red-50 transition-colors",
+            collapsed && "justify-center p-2"
+          )}
         >
           <LogOut size={20} />
           {!collapsed && <span>Logout</span>}
