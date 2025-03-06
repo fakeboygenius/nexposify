@@ -79,10 +79,10 @@ const OrderTypeSelector: React.FC<OrderTypeSelectorProps> = ({
           <div className="flex items-center justify-between">
             <div className="text-sm font-medium">Table Options:</div>
             <div className="flex gap-2">
-              <Button size="xs" variant="ghost" className="h-7 text-xs">
+              <Button size="sm" variant="ghost" className="h-7 text-xs">
                 Merge Tables
               </Button>
-              <Button size="xs" variant="ghost" className="h-7 text-xs">
+              <Button size="sm" variant="ghost" className="h-7 text-xs">
                 Split Table
               </Button>
             </div>
@@ -138,13 +138,13 @@ const OrderTypeSelector: React.FC<OrderTypeSelectorProps> = ({
         <div className="mt-2 bg-orange-50 p-2 rounded-md border border-orange-100">
           <div className="text-sm font-medium mb-1">Delivery Options:</div>
           <div className="flex gap-2">
-            <Button size="xs" variant="outline" className="h-7 text-xs">
+            <Button size="sm" variant="outline" className="h-7 text-xs">
               Assign Driver
             </Button>
-            <Button size="xs" variant="outline" className="h-7 text-xs">
+            <Button size="sm" variant="outline" className="h-7 text-xs">
               Delivery Time
             </Button>
-            <Button size="xs" variant="outline" className="h-7 text-xs">
+            <Button size="sm" variant="outline" className="h-7 text-xs">
               Delivery Address
             </Button>
           </div>
@@ -155,10 +155,10 @@ const OrderTypeSelector: React.FC<OrderTypeSelectorProps> = ({
         <div className="mt-2 bg-green-50 p-2 rounded-md border border-green-100">
           <div className="text-sm font-medium mb-1">Takeout Options:</div>
           <div className="flex gap-2">
-            <Button size="xs" variant="outline" className="h-7 text-xs">
+            <Button size="sm" variant="outline" className="h-7 text-xs">
               Pickup Time
             </Button>
-            <Button size="xs" variant="outline" className="h-7 text-xs">
+            <Button size="sm" variant="outline" className="h-7 text-xs">
               Packaging Options
             </Button>
           </div>
@@ -169,13 +169,13 @@ const OrderTypeSelector: React.FC<OrderTypeSelectorProps> = ({
         <div className="mt-2 bg-purple-50 p-2 rounded-md border border-purple-100">
           <div className="text-sm font-medium mb-1">Curbside Options:</div>
           <div className="flex gap-2">
-            <Button size="xs" variant="outline" className="h-7 text-xs">
+            <Button size="sm" variant="outline" className="h-7 text-xs">
               Vehicle Details
             </Button>
-            <Button size="xs" variant="outline" className="h-7 text-xs">
+            <Button size="sm" variant="outline" className="h-7 text-xs">
               Pickup Time
             </Button>
-            <Button size="xs" variant="outline" className="h-7 text-xs">
+            <Button size="sm" variant="outline" className="h-7 text-xs">
               Parking Spot
             </Button>
           </div>
@@ -186,13 +186,13 @@ const OrderTypeSelector: React.FC<OrderTypeSelectorProps> = ({
         <div className="mt-2 bg-yellow-50 p-2 rounded-md border border-yellow-100">
           <div className="text-sm font-medium mb-1">Reservation Details:</div>
           <div className="flex gap-2">
-            <Button size="xs" variant="outline" className="h-7 text-xs">
+            <Button size="sm" variant="outline" className="h-7 text-xs">
               Time Slot
             </Button>
-            <Button size="xs" variant="outline" className="h-7 text-xs">
+            <Button size="sm" variant="outline" className="h-7 text-xs">
               Party Size
             </Button>
-            <Button size="xs" variant="outline" className="h-7 text-xs">
+            <Button size="sm" variant="outline" className="h-7 text-xs">
               Special Requests
             </Button>
           </div>
