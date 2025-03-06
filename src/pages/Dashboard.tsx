@@ -4,6 +4,7 @@ import { useRestaurant } from '@/context/RestaurantContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 import { 
   BarChart, 
   PieChart, 
@@ -16,11 +17,18 @@ import {
   Clock, 
   Utensils, 
   Users, 
-  ArrowRight
+  ArrowRight,
+  LayoutGrid,
+  Ticket,
+  CreditCard,
+  CircleDollarSign,
+  ShoppingCart,
+  BookOpen,
 } from 'lucide-react';
 
 const Dashboard = () => {
   const { orders, tables, menuItems } = useRestaurant();
+  const navigate = useNavigate();
 
   // Calculate some basic stats
   const totalOrders = orders.length;
@@ -40,6 +48,41 @@ const Dashboard = () => {
           Free Plan
         </Badge>
       </div>
+      
+      {/* SambaPOS-style Order Flow Section */}
+      <Card className="p-6">
+        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <Utensils className="text-teal-500" size={20} /> 
+          Quick Access
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <OrderFlowCard 
+            title="Tables" 
+            description="View and manage all tables"
+            icon={<LayoutGrid size={24} className="text-blue-500" />}
+            onClick={() => navigate('/pos')}
+          />
+          <OrderFlowCard 
+            title="New Order" 
+            description="Create a new order ticket"
+            icon={<Ticket size={24} className="text-green-500" />}
+            onClick={() => navigate('/pos')}
+            primary
+          />
+          <OrderFlowCard 
+            title="Order Line" 
+            description="View and manage all orders"
+            icon={<ShoppingCart size={24} className="text-purple-500" />}
+            onClick={() => navigate('/order-line')}
+          />
+          <OrderFlowCard 
+            title="Payments" 
+            description="Process and view payments"
+            icon={<CreditCard size={24} className="text-amber-500" />}
+            onClick={() => navigate('/pos?tab=payment')}
+          />
+        </div>
+      </Card>
       
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -185,6 +228,28 @@ const Dashboard = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// New component for Order Flow cards
+const OrderFlowCard = ({ title, description, icon, onClick, primary = false }) => {
+  return (
+    <Card 
+      className={`p-4 cursor-pointer transition-all hover:shadow-md ${
+        primary ? 'bg-teal-50 border-teal-200' : 'bg-white border-gray-200'
+      }`}
+      onClick={onClick}
+    >
+      <div className="flex items-center gap-3">
+        <div className={`p-3 rounded-lg ${primary ? 'bg-teal-100' : 'bg-gray-100'}`}>
+          {icon}
+        </div>
+        <div>
+          <h3 className={`font-semibold ${primary ? 'text-teal-700' : 'text-gray-800'}`}>{title}</h3>
+          <p className="text-sm text-gray-500">{description}</p>
+        </div>
+      </div>
+    </Card>
   );
 };
 
