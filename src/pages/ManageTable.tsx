@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -25,14 +24,12 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 
-// Floor plan configuration
 const FLOOR_GRID = {
   mainDining: {
     rows: 3,
@@ -233,14 +230,12 @@ const TableComponent = ({
   onSelect,
   isSelected
 }: TableProps) => {
-  // Table shape variations based on capacity
   const getTableShape = () => {
     if (capacity <= 2) return "rounded-full";
     if (capacity <= 4) return "rounded-md";
     return "rounded-md";
   };
 
-  // Size variations based on capacity
   const getTableSize = () => {
     if (capacity <= 2) return "w-16 h-16";
     if (capacity <= 4) return "w-20 h-20";
@@ -248,7 +243,6 @@ const TableComponent = ({
     return "w-28 h-20";
   };
 
-  // Table status styling
   const getStatusStyles = () => {
     switch (status) {
       case TableStatus.Available:
@@ -317,7 +311,6 @@ const FloorPlanGrid = ({
   
   const grid = Array(sectionConfig.rows).fill(0).map(() => Array(sectionConfig.cols).fill(null));
   
-  // Distribute tables across the grid
   filteredTables.forEach((table, index) => {
     const row = Math.floor(index / sectionConfig.cols);
     const col = index % sectionConfig.cols;
@@ -373,7 +366,6 @@ const NewReservationDialog = ({ tableId }: { tableId: string | null }) => {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // This would normally be a form submission with real data
     if (tableId) {
       addReservation({
         tableId,
@@ -474,6 +466,7 @@ const NewReservationDialog = ({ tableId }: { tableId: string | null }) => {
 };
 
 const ManageTable = () => {
+  const navigate = useNavigate();
   const { tables, reservations } = useRestaurant();
   const [activeSection, setActiveSection] = useState('mainDining');
   const [activeTab, setActiveTab] = useState('floorPlan');
@@ -481,9 +474,9 @@ const ManageTable = () => {
   
   const handleSelectTable = (id: string) => {
     setSelectedTableId(prevId => prevId === id ? null : id);
+    navigate('/order-line', { state: { tableId: id } });
   };
   
-  // Count tables by section
   const tableCounts = {
     mainDining: tables.filter(t => t.section === 'mainDining').length,
     terrace: tables.filter(t => t.section === 'terrace').length,
@@ -492,7 +485,6 @@ const ManageTable = () => {
 
   return (
     <div className="flex h-full">
-      {/* Left side - Reservations */}
       <div className="w-1/3 border-r border-gray-200 overflow-y-auto p-4">
         <div className="relative mb-4">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -581,7 +573,6 @@ const ManageTable = () => {
         </div>
       </div>
 
-      {/* Right side - Table layout */}
       <div className="w-2/3 p-6 overflow-y-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Manage Tables</h1>
