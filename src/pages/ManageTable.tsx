@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { 
@@ -14,7 +13,16 @@ import {
   Clock,
   Coffee,
   X,
-  Edit
+  Edit,
+  MoreHorizontal,
+  Printer,
+  Trash2,
+  Settings,
+  RefreshCw,
+  CheckSquare,
+  Square,
+  Coffee as CoffeeFilled,
+  ChevronDown
 } from 'lucide-react';
 import { useRestaurant } from '@/context/RestaurantContext';
 import { TableStatus, ReservationStatus } from '@/lib/types';
@@ -30,7 +38,26 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
+import { toast } from "sonner";
 
 const FLOOR_GRID = {
   mainDining: {
@@ -297,6 +324,62 @@ const TableComponent = ({
   );
 };
 
+const TableQuickActions = ({ tableId }: { tableId: string }) => {
+  const { tables, updateTableStatus } = useRestaurant();
+  const navigate = useNavigate();
+  const table = tables.find(t => t.id === tableId);
+  
+  if (!table) return null;
+  
+  const handleStatusChange = (newStatus: TableStatus) => {
+    updateTableStatus(tableId, newStatus);
+    toast.success(`Table ${table.number} status changed to ${newStatus}`);
+  };
+  
+  const handleViewOrders = () => {
+    navigate('/order-line', { state: { tableId } });
+  };
+  
+  return (
+    <div className="absolute z-10 top-2 right-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full bg-white bg-opacity-70 hover:bg-opacity-100">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-40">
+          <DropdownMenuLabel>Table {table.number}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleViewOrders}>
+            <CoffeeFilled className="mr-2 h-4 w-4" /> View Orders
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel className="text-xs">Change Status</DropdownMenuLabel>
+          <DropdownMenuItem 
+            onClick={() => handleStatusChange(TableStatus.Available)}
+            className="text-teal-600"
+          >
+            <div className="h-2 w-2 rounded-full bg-teal-500 mr-2" /> Available
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={() => handleStatusChange(TableStatus.Reserved)}
+            className="text-red-600"
+          >
+            <div className="h-2 w-2 rounded-full bg-red-500 mr-2" /> Reserved
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={() => handleStatusChange(TableStatus.Occupied)}
+            className="text-orange-600"
+          >
+            <div className="h-2 w-2 rounded-full bg-orange-500 mr-2" /> Occupied
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+};
+
 const FloorPlanGrid = ({ 
   tables, 
   selectedTable,
@@ -336,17 +419,20 @@ const FloorPlanGrid = ({
         }}
       >
         {grid.flat().map((table, index) => (
-          <div key={index} className="min-h-24 flex items-center justify-center">
+          <div key={index} className="min-h-24 flex items-center justify-center relative">
             {table ? (
-              <TableComponent
-                id={table.id}
-                number={table.number}
-                capacity={table.capacity}
-                status={table.status}
-                position={{ row: Math.floor(index / sectionConfig.cols), col: index % sectionConfig.cols }}
-                onSelect={onSelectTable}
-                isSelected={selectedTable === table.id}
-              />
+              <>
+                <TableComponent
+                  id={table.id}
+                  number={table.number}
+                  capacity={table.capacity}
+                  status={table.status}
+                  position={{ row: Math.floor(index / sectionConfig.cols), col: index % sectionConfig.cols }}
+                  onSelect={onSelectTable}
+                  isSelected={selectedTable === table.id}
+                />
+                <TableQuickActions tableId={table.id} />
+              </>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <div className="w-12 h-12 border border-dashed border-gray-300 rounded-md flex items-center justify-center text-gray-400 hover:bg-gray-50 cursor-pointer">
@@ -364,20 +450,55 @@ const FloorPlanGrid = ({
 const NewReservationDialog = ({ tableId }: { tableId: string | null }) => {
   const { addReservation, tables } = useRestaurant();
   const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    customerName: '',
+    customerPhone: '',
+    guests: 2,
+    date: format(new Date(), 'yyyy-MM-dd'),
+    time: '19:00',
+    notes: ''
+  });
+
   const selectedTable = tables.find(table => table.id === tableId);
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: parseInt(value) || 0 }));
+  };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (tableId) {
+      // Combine date and time into a Date object
+      const dateTimeStr = `${formData.date}T${formData.time}`;
+      const reservationDateTime = new Date(dateTimeStr);
+      
       addReservation({
         tableId,
-        customerName: "New Customer",
-        customerPhone: "+1 234 567 890",
-        guests: 2,
-        time: new Date(),
+        customerName: formData.customerName,
+        customerPhone: formData.customerPhone,
+        guests: formData.guests,
+        time: reservationDateTime,
+        notes: formData.notes,
         status: ReservationStatus.Confirmed
       });
+      
+      // Reset form and close dialog
+      setFormData({
+        customerName: '',
+        customerPhone: '',
+        guests: 2,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        time: '19:00',
+        notes: ''
+      });
       setIsOpen(false);
+      toast.success(`Reservation created for ${formData.customerName}`);
     }
   };
   
@@ -401,48 +522,72 @@ const NewReservationDialog = ({ tableId }: { tableId: string | null }) => {
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Customer Name</label>
-              <input 
-                type="text" 
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
+              <Label htmlFor="customerName">Customer Name</Label>
+              <Input 
+                id="customerName"
+                name="customerName"
+                value={formData.customerName}
+                onChange={handleChange}
                 placeholder="Customer name"
                 required
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Phone Number</label>
-              <input 
-                type="tel" 
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
+              <Label htmlFor="customerPhone">Phone Number</Label>
+              <Input 
+                id="customerPhone"
+                name="customerPhone"
+                value={formData.customerPhone}
+                onChange={handleChange}
                 placeholder="Phone number"
               />
             </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Date & Time</label>
-              <input 
-                type="datetime-local" 
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
+              <Label htmlFor="date">Date</Label>
+              <Input 
+                id="date"
+                name="date"
+                type="date"
+                value={formData.date}
+                onChange={handleChange}
                 required
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Number of Guests</label>
-              <input 
-                type="number" 
+              <Label htmlFor="time">Time</Label>
+              <Input 
+                id="time"
+                name="time"
+                type="time"
+                value={formData.time}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="guests">Guests</Label>
+              <Input 
+                id="guests"
+                name="guests"
+                type="number"
                 min="1"
-                className="w-full rounded-md border border-gray-300 px-3 py-2"
-                placeholder="Number of guests"
+                value={formData.guests}
+                onChange={handleNumberChange}
                 required
               />
             </div>
           </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-medium">Notes</label>
+            <Label htmlFor="notes">Notes</Label>
             <textarea 
+              id="notes"
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
               className="w-full rounded-md border border-gray-300 px-3 py-2"
               placeholder="Special requests or notes"
               rows={3}
@@ -467,23 +612,273 @@ const NewReservationDialog = ({ tableId }: { tableId: string | null }) => {
   );
 };
 
+const TableFilters = ({ 
+  onStatusFilter, 
+  onSectionFilter,
+  onCapacityFilter,
+  selectedFilters
+}: { 
+  onStatusFilter: (status: TableStatus | null) => void;
+  onSectionFilter: (section: string | null) => void;
+  onCapacityFilter: (capacity: number | null) => void;
+  selectedFilters: {
+    status: TableStatus | null;
+    section: string | null;
+    capacity: number | null;
+  };
+}) => {
+  return (
+    <div className="flex flex-wrap gap-2 mb-4">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className="flex items-center gap-1">
+            <Filter className="h-4 w-4" />
+            Status
+            <ChevronDown className="h-3 w-3 opacity-50" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem onClick={() => onStatusFilter(null)} className="justify-between">
+            All
+            {selectedFilters.status === null && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onStatusFilter(TableStatus.Available)} className="justify-between">
+            <div className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-teal-500 mr-2" />
+              Available
+            </div>
+            {selectedFilters.status === TableStatus.Available && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onStatusFilter(TableStatus.Reserved)} className="justify-between">
+            <div className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-red-500 mr-2" />
+              Reserved
+            </div>
+            {selectedFilters.status === TableStatus.Reserved && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onStatusFilter(TableStatus.Occupied)} className="justify-between">
+            <div className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-orange-500 mr-2" />
+              Occupied
+            </div>
+            {selectedFilters.status === TableStatus.Occupied && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className="flex items-center gap-1">
+            <Coffee className="h-4 w-4" />
+            Section
+            <ChevronDown className="h-3 w-3 opacity-50" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem onClick={() => onSectionFilter(null)} className="justify-between">
+            All Sections
+            {selectedFilters.section === null && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSectionFilter('mainDining')} className="justify-between">
+            Main Dining
+            {selectedFilters.section === 'mainDining' && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSectionFilter('terrace')} className="justify-between">
+            Terrace
+            {selectedFilters.section === 'terrace' && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSectionFilter('outdoor')} className="justify-between">
+            Outdoor
+            {selectedFilters.section === 'outdoor' && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className="flex items-center gap-1">
+            <Users className="h-4 w-4" />
+            Capacity
+            <ChevronDown className="h-3 w-3 opacity-50" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          <DropdownMenuItem onClick={() => onCapacityFilter(null)} className="justify-between">
+            All
+            {selectedFilters.capacity === null && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onCapacityFilter(2)} className="justify-between">
+            2 Seats
+            {selectedFilters.capacity === 2 && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onCapacityFilter(4)} className="justify-between">
+            4 Seats
+            {selectedFilters.capacity === 4 && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onCapacityFilter(6)} className="justify-between">
+            6+ Seats
+            {selectedFilters.capacity === 6 && <CheckSquare className="h-4 w-4" />}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      
+      {(selectedFilters.status !== null || selectedFilters.section !== null || selectedFilters.capacity !== null) && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => {
+            onStatusFilter(null);
+            onSectionFilter(null);
+            onCapacityFilter(null);
+          }}
+          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+        >
+          <X className="h-4 w-4 mr-1" />
+          Clear Filters
+        </Button>
+      )}
+    </div>
+  );
+};
+
+const BulkActions = ({ selectedIds, onClearSelection }: { selectedIds: string[], onClearSelection: () => void }) => {
+  const { updateTableStatus } = useRestaurant();
+  
+  const handleBulkStatusChange = (status: TableStatus) => {
+    selectedIds.forEach(id => {
+      updateTableStatus(id, status);
+    });
+    toast.success(`Updated ${selectedIds.length} tables to ${status}`);
+    onClearSelection();
+  };
+  
+  if (selectedIds.length === 0) return null;
+  
+  return (
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white shadow-lg border border-gray-200 rounded-lg p-3 flex items-center gap-3 z-50">
+      <div className="text-sm font-medium mr-2">
+        {selectedIds.length} {selectedIds.length === 1 ? 'table' : 'tables'} selected
+      </div>
+      
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="text-teal-600 hover:bg-teal-50 border-teal-200"
+        onClick={() => handleBulkStatusChange(TableStatus.Available)}
+      >
+        Set Available
+      </Button>
+      
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="text-red-600 hover:bg-red-50 border-red-200"
+        onClick={() => handleBulkStatusChange(TableStatus.Reserved)}
+      >
+        Set Reserved
+      </Button>
+      
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="text-orange-600 hover:bg-orange-50 border-orange-200"
+        onClick={() => handleBulkStatusChange(TableStatus.Occupied)}
+      >
+        Set Occupied
+      </Button>
+      
+      <Button 
+        variant="ghost" 
+        size="sm" 
+        onClick={onClearSelection}
+      >
+        Clear Selection
+      </Button>
+    </div>
+  );
+};
+
 const ManageTable = () => {
   const navigate = useNavigate();
-  const { tables, reservations } = useRestaurant();
+  const { tables, reservations, updateTableStatus } = useRestaurant();
   const [activeSection, setActiveSection] = useState('mainDining');
   const [activeTab, setActiveTab] = useState('floorPlan');
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [filters, setFilters] = useState({
+    status: null as TableStatus | null,
+    section: null as string | null,
+    capacity: null as number | null
+  });
+  const [showQuickActionModal, setShowQuickActionModal] = useState(false);
   
   const handleSelectTable = (id: string) => {
+    // If in selection mode, toggle selection
+    if (selectedItems.length > 0) {
+      setSelectedItems(prev => 
+        prev.includes(id) 
+          ? prev.filter(item => item !== id) 
+          : [...prev, id]
+      );
+      return;
+    }
+    
+    // Otherwise proceed to normal table selection
     setSelectedTableId(prevId => prevId === id ? null : id);
     navigate('/order-line', { state: { tableId: id } });
   };
   
-  const tableCounts = {
-    mainDining: tables.filter(t => t.section === 'mainDining').length,
-    terrace: tables.filter(t => t.section === 'terrace').length,
-    outdoor: tables.filter(t => t.section === 'outdoor').length,
+  const handleStatusFilter = (status: TableStatus | null) => {
+    setFilters(prev => ({ ...prev, status }));
   };
+  
+  const handleSectionFilter = (section: string | null) => {
+    setFilters(prev => ({ ...prev, section }));
+  };
+  
+  const handleCapacityFilter = (capacity: number | null) => {
+    setFilters(prev => ({ ...prev, capacity }));
+  };
+  
+  const filteredTables = tables.filter(table => {
+    // Apply search filter
+    if (searchQuery && !table.number.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    
+    // Apply status filter
+    if (filters.status && table.status !== filters.status) {
+      return false;
+    }
+    
+    // Apply section filter
+    if (filters.section && table.section !== filters.section) {
+      return false;
+    }
+    
+    // Apply capacity filter
+    if (filters.capacity) {
+      if (filters.capacity === 6) {
+        if (table.capacity < 6) return false;
+      } else {
+        if (table.capacity !== filters.capacity) return false;
+      }
+    }
+    
+    return true;
+  });
+  
+  const tableCounts = {
+    mainDining: filteredTables.filter(t => t.section === 'mainDining').length,
+    terrace: filteredTables.filter(t => t.section === 'terrace').length,
+    outdoor: filteredTables.filter(t => t.section === 'outdoor').length,
+  };
+
+  // Reset selected items when tab changes
+  useEffect(() => {
+    setSelectedItems([]);
+  }, [activeTab]);
 
   return (
     <div className="flex h-full">
@@ -511,351 +906,4 @@ const ManageTable = () => {
             customer="Uthman ibn Hunaif" 
             people={6} 
             table="T1" 
-            phone="+84 678 890 000" 
-            status="payment" 
-          />
-          <ReservationItem 
-            id="res2"
-            time="" 
-            customer="Bashir ibn Sa'ad" 
-            people={2} 
-            table="T2" 
-            phone="" 
-            status="on-dine" 
-          />
-          <ReservationItem 
-            id="res3"
-            time="8:00 PM" 
-            customer="Ali" 
-            people={2} 
-            table="T3" 
-            phone="+84 342 556 555" 
-            status="payment" 
-          />
-          <ReservationItem 
-            id="res4"
-            time="" 
-            customer="Khunais ibn Hudhafa" 
-            people={3} 
-            table="T4" 
-            phone="" 
-            status="on-dine" 
-          />
-          <ReservationItem 
-            id="res5"
-            time="" 
-            customer="Available Now" 
-            people={0} 
-            table="T5" 
-            phone="" 
-            status="free" 
-          />
-          <ReservationItem 
-            id="res6"
-            time="8:25 PM" 
-            customer="Mus'ab ibn Umayr" 
-            people={7} 
-            table="T6" 
-            phone="+84 800 563 554" 
-            status="unpaid" 
-          />
-          <ReservationItem 
-            id="res7"
-            time="9:00 PM" 
-            customer="Shuja ibn Wahb" 
-            people={10} 
-            table="T7" 
-            phone="+84 900 100 200" 
-            status="payment" 
-          />
-        </div>
-
-        <div className="mt-6">
-          <NewReservationDialog tableId={selectedTableId} />
-        </div>
-      </div>
-
-      <div className="w-2/3 p-6 overflow-y-auto">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Manage Tables</h1>
-          
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-teal-500"></div>
-              <span className="text-sm text-gray-600">Available</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <span className="text-sm text-gray-600">Reserved</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-              <span className="text-sm text-gray-600">On Dine</span>
-            </div>
-          </div>
-          
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full mb-6">
-              <TabsTrigger value="floorPlan" className="flex-1">Floor Plan</TabsTrigger>
-              <TabsTrigger value="list" className="flex-1">List View</TabsTrigger>
-              <TabsTrigger value="settings" className="flex-1">Settings</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="floorPlan" className="mt-0">
-              <div className="flex gap-2 mb-6">
-                <TableSection 
-                  title="Main Dining" 
-                  isActive={activeSection === 'mainDining'} 
-                  count={tableCounts.mainDining}
-                  onClick={() => setActiveSection('mainDining')}
-                />
-                <TableSection 
-                  title="Terrace" 
-                  isActive={activeSection === 'terrace'} 
-                  count={tableCounts.terrace}
-                  onClick={() => setActiveSection('terrace')}
-                />
-                <TableSection 
-                  title="Outdoor" 
-                  isActive={activeSection === 'outdoor'} 
-                  count={tableCounts.outdoor}
-                  onClick={() => setActiveSection('outdoor')}
-                />
-              </div>
-              
-              <FloorPlanGrid 
-                tables={tables} 
-                selectedTable={selectedTableId}
-                onSelectTable={handleSelectTable}
-                section={activeSection}
-              />
-              
-              {selectedTableId && (
-                <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-white/50">
-                  <h3 className="text-lg font-medium mb-2">Selected Table Details</h3>
-                  {(() => {
-                    const table = tables.find(t => t.id === selectedTableId);
-                    if (!table) return <p>No table selected</p>;
-                    
-                    return (
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Table Number:</span>
-                          <span className="font-medium">{table.number}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Capacity:</span>
-                          <span className="font-medium">{table.capacity}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Status:</span>
-                          <Badge 
-                            variant="outline" 
-                            className={cn(
-                              "font-medium",
-                              table.status === TableStatus.Available ? "bg-green-100 text-green-800 hover:bg-green-100" :
-                              table.status === TableStatus.Reserved ? "bg-red-100 text-red-800 hover:bg-red-100" :
-                              "bg-orange-100 text-orange-800 hover:bg-orange-100"
-                            )}
-                          >
-                            {table.status}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Section:</span>
-                          <span className="font-medium">{table.section}</span>
-                        </div>
-                        
-                        <div className="flex gap-2 mt-4 pt-4 border-t border-gray-200">
-                          <Button variant="outline" className="flex-1">
-                            Edit Table
-                          </Button>
-                          {table.status === TableStatus.Available && (
-                            <Button className="flex-1 bg-teal-600 hover:bg-teal-700">
-                              Reserve Table
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="list" className="mt-0">
-              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr>
-                      <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Table No.
-                      </th>
-                      <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Capacity
-                      </th>
-                      <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Section
-                      </th>
-                      <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {tables.map((table) => (
-                      <tr 
-                        key={table.id} 
-                        className={cn(
-                          "hover:bg-gray-50 cursor-pointer",
-                          selectedTableId === table.id ? "bg-gray-50" : ""
-                        )}
-                        onClick={() => handleSelectTable(table.id)}
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {table.number}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {table.capacity} Seats
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {table.section}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Badge 
-                            variant="outline" 
-                            className={cn(
-                              "font-medium",
-                              table.status === TableStatus.Available ? "bg-green-100 text-green-800 hover:bg-green-100" :
-                              table.status === TableStatus.Reserved ? "bg-red-100 text-red-800 hover:bg-red-100" :
-                              "bg-orange-100 text-orange-800 hover:bg-orange-100"
-                            )}
-                          >
-                            {table.status}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <div className="flex space-x-2">
-                            <Button variant="outline" size="sm">Edit</Button>
-                            <Button 
-                              size="sm" 
-                              className={
-                                table.status === TableStatus.Available 
-                                  ? "bg-teal-600 hover:bg-teal-700" 
-                                  : "bg-red-600 hover:bg-red-700"
-                              }
-                            >
-                              {table.status === TableStatus.Available ? "Reserve" : "Change Status"}
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="settings" className="mt-0">
-              <div className="space-y-6 max-w-2xl mx-auto">
-                <div className="bg-white p-6 rounded-lg border border-gray-200">
-                  <h3 className="text-lg font-medium mb-4">Floor Plan Settings</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-1">
-                        Add New Section
-                      </label>
-                      <div className="flex gap-2">
-                        <input 
-                          type="text" 
-                          placeholder="Section name" 
-                          className="rounded-md border border-gray-300 flex-1 px-3 py-2 text-sm"
-                        />
-                        <Button className="bg-teal-600 hover:bg-teal-700">
-                          Add Section
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-1">
-                        Add New Table
-                      </label>
-                      <div className="grid grid-cols-3 gap-3">
-                        <input 
-                          type="text" 
-                          placeholder="Table number" 
-                          className="rounded-md border border-gray-300 px-3 py-2 text-sm"
-                        />
-                        <input 
-                          type="number" 
-                          placeholder="Capacity" 
-                          min="1"
-                          className="rounded-md border border-gray-300 px-3 py-2 text-sm"
-                        />
-                        <select className="rounded-md border border-gray-300 px-3 py-2 text-sm">
-                          <option value="">Select section</option>
-                          <option value="mainDining">Main Dining</option>
-                          <option value="terrace">Terrace</option>
-                          <option value="outdoor">Outdoor</option>
-                        </select>
-                      </div>
-                      <Button className="bg-teal-600 hover:bg-teal-700 mt-2">
-                        Add Table
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-white p-6 rounded-lg border border-gray-200">
-                  <h3 className="text-lg font-medium mb-4">Table Status Options</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 rounded-full bg-teal-500"></div>
-                        <span>Available</span>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 rounded-full bg-red-500"></div>
-                        <span>Reserved</span>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 rounded-full bg-orange-500"></div>
-                        <span>On Dine</span>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                      </div>
-                    </div>
-                    
-                    <Button variant="outline" className="flex items-center gap-2">
-                      <Plus className="h-4 w-4" />
-                      Add Custom Status
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default ManageTable;
+            phone="+84 678 890
