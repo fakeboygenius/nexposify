@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
@@ -84,7 +83,7 @@ const Sidebar = () => {
           collapsed={collapsed}
         />
         <SidebarLink 
-          to="/pos" 
+          to="/manage-table" 
           icon={<CreditCard size={20} />} 
           label="POS"
           collapsed={collapsed} 
@@ -93,12 +92,6 @@ const Sidebar = () => {
           to="/manage-dishes" 
           icon={<Utensils size={20} />} 
           label="Menu Items"
-          collapsed={collapsed} 
-        />
-        <SidebarLink 
-          to="/manage-table" 
-          icon={<Utensils size={20} />} 
-          label="Manage Tables"
           collapsed={collapsed} 
         />
       </div>

@@ -8,7 +8,6 @@ import { RestaurantProvider } from "@/context/RestaurantContext";
 
 import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/Dashboard";
-import POS from "@/pages/POS";
 import ManageDishes from "@/pages/ManageDishes";
 import ManageTable from "@/pages/ManageTable";
 import NotFound from "@/pages/NotFound";
@@ -25,11 +24,11 @@ const App = () => (
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/pos" element={<POS />} />
+              <Route path="/pos" element={<Navigate to="/manage-table" replace />} />
               <Route path="/manage-dishes" element={<ManageDishes />} />
               <Route path="/manage-table" element={<ManageTable />} />
-              {/* Redirect old order-line route to new POS route */}
-              <Route path="/order-line" element={<Navigate to="/pos" replace />} />
+              {/* Redirect old order-line route to manage-table route */}
+              <Route path="/order-line" element={<Navigate to="/manage-table" replace />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
