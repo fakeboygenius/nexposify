@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,10 +8,9 @@ import { RestaurantProvider } from "@/context/RestaurantContext";
 
 import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/Dashboard";
-import OrderLine from "@/pages/OrderLine";
+import POS from "@/pages/POS";
 import ManageDishes from "@/pages/ManageDishes";
 import ManageTable from "@/pages/ManageTable";
-import POS from "@/pages/POS";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,10 +25,11 @@ const App = () => (
           <Routes>
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/order-line" element={<OrderLine />} />
+              <Route path="/pos" element={<POS />} />
               <Route path="/manage-dishes" element={<ManageDishes />} />
               <Route path="/manage-table" element={<ManageTable />} />
-              <Route path="/pos" element={<POS />} />
+              {/* Redirect old order-line route to new POS route */}
+              <Route path="/order-line" element={<Navigate to="/pos" replace />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

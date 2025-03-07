@@ -28,7 +28,7 @@ const POSTables: React.FC<POSTablesProps> = ({ onTableSelect }) => {
     <div className="h-full flex flex-col">
       {/* Top section with main navigation options */}
       <div className="flex border-b mb-4 pb-2 overflow-x-auto">
-        {['Delivery', 'SambaCard', 'Tables', 'Customer Search', 'Customer Tickets', 'Customers'].map(item => (
+        {['Tables', 'SambaCard', 'Delivery', 'Customer Search', 'Customer Tickets', 'Customers'].map(item => (
           <Button 
             key={item}
             variant={item === 'Tables' ? 'default' : 'ghost'}

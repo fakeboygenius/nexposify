@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutGrid, 
-  ListOrdered, 
   Utensils, 
   Users, 
   Settings, 
@@ -87,43 +86,19 @@ const Sidebar = () => {
         <SidebarLink 
           to="/pos" 
           icon={<CreditCard size={20} />} 
-          label="Tables"
-          collapsed={collapsed} 
-        />
-        <SidebarLink 
-          to="/order-line" 
-          icon={<ListOrdered size={20} />} 
-          label="Order Line"
-          collapsed={collapsed} 
-        />
-        <SidebarLink 
-          to="/pos?tab=tickets" 
-          icon={<Ticket size={20} />} 
-          label="Customer Tickets"
-          collapsed={collapsed} 
-        />
-        <SidebarLink 
-          to="/customers" 
-          icon={<Users size={20} />} 
-          label="Customers"
-          collapsed={collapsed} 
-        />
-        <SidebarLink 
-          to="/delivery" 
-          icon={<Truck size={20} />} 
-          label="Delivery"
-          collapsed={collapsed} 
-        />
-        <SidebarLink 
-          to="/loyalty" 
-          icon={<Tag size={20} />} 
-          label="SambaCard"
+          label="POS"
           collapsed={collapsed} 
         />
         <SidebarLink 
           to="/manage-dishes" 
           icon={<Utensils size={20} />} 
           label="Menu Items"
+          collapsed={collapsed} 
+        />
+        <SidebarLink 
+          to="/manage-table" 
+          icon={<Utensils size={20} />} 
+          label="Manage Tables"
           collapsed={collapsed} 
         />
       </div>
