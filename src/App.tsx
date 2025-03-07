@@ -10,6 +10,7 @@ import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/Dashboard";
 import ManageDishes from "@/pages/ManageDishes";
 import ManageTable from "@/pages/ManageTable";
+import OrderLine from "@/pages/OrderLine";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,8 +28,7 @@ const App = () => (
               <Route path="/pos" element={<Navigate to="/manage-table" replace />} />
               <Route path="/manage-dishes" element={<ManageDishes />} />
               <Route path="/manage-table" element={<ManageTable />} />
-              {/* Redirect old order-line route to manage-table route */}
-              <Route path="/order-line" element={<Navigate to="/manage-table" replace />} />
+              <Route path="/order-line" element={<OrderLine />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
